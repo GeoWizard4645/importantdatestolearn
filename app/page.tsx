@@ -11,15 +11,17 @@ const TEST_QUESTION_COUNT = 20;
 
 const modes: { id: Mode; label: string; mark: string; note: string }[] = [
   { id: "flashcards", label: "Flashcards", mark: "▰", note: "Flip and review" },
-  { id: "learn", label: "Learn", mark: "✦", note: "All events, two ways" },
+  { id: "learn", label: "Learn", mark: "✦", note: "Unlimited practice" },
   { id: "test", label: "Test", mark: "▤", note: "20-question rounds" },
-  { id: "blockblast", label: "Block Blast", mark: "◆", note: "Quiz, then 5 moves" },
-  { id: "charms", label: "Charms", mark: "⬟", note: "Keep your hearts" },
+  { id: "blockblast", label: "Block Blast", mark: "◆", note: "Quiz, then drag blocks" },
+  { id: "charms", label: "Charms", mark: "⬟", note: "Streaks & hearts" },
 ];
 
 const BLAST_GRID_SIZE = 8;
 const QUESTIONS_PER_BLAST = 5;
 const BLAST_MOVES = 5;
+const WRONG_PENALTY = 5;
+const LEARN_HIGH_SCORE_KEY = "chronicle-learn-high-score";
 const PIECE_COLORS = ["#4255ff", "#6c45e9", "#5a58e9", "#34b276", "#e5a500", "#7b4ae8"];
 
 const BLAST_SHAPES: [number, number][][] = [
@@ -165,8 +167,68 @@ function pieceFitsAnywhere(grid: (string | null)[][], cells: [number, number][])
 
 function useShuffledDeck() {
   const [deck, setDeck] = useState(() => shuffleArray(events));
-  const reshuffle = () => setDeck(shuffleArray(events));
+  const reshuffle = () => {
+    const next = shuffleArray(events);
+    setDeck(next);
+    return next;
+  };
   return { deck, reshuffle };
+}
+
+function readLearnHighScore() {
+  if (typeof window === "undefined") return 0;
+  const raw = window.localStorage.getItem(LEARN_HIGH_SCORE_KEY);
+  const value = Number(raw);
+  return Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value))) : 0;
+}
+
+function saveLearnHighScore(value: number) {
+  window.localStorage.setItem(LEARN_HIGH_SCORE_KEY, String(value));
+}
+
+function QuizChoiceGrid({
+  item,
+  choice,
+  result,
+  eliminated,
+  onChoose,
+}: {
+  item: EventItem;
+  choice: string;
+  result: "correct" | "wrong" | null;
+  eliminated: Set<string>;
+  onChoose: (option: string) => void;
+}) {
+  return (
+    <div className="choice-grid">
+      {optionsFor(item, events).map((option, optionIndex) => {
+        const isEliminated = eliminated.has(option);
+        const showWrong = result === "wrong" && choice === option;
+        const showRight = result === "correct" && option === item.year;
+        return (
+          <button
+            key={option}
+            type="button"
+            onClick={() => {
+              if (result || isEliminated) return;
+              onChoose(option);
+            }}
+            disabled={Boolean(result) || isEliminated}
+            className={[
+              choice === option && result ? "chosen" : "",
+              showRight ? "right" : "",
+              showWrong ? "wrong-choice" : "",
+              isEliminated ? "eliminated" : "",
+            ].filter(Boolean).join(" ")}
+          >
+            <span>{String.fromCharCode(65 + optionIndex)}</span>
+            <em>{option}</em>
+            {(showWrong || isEliminated) && <i className="choice-x" aria-hidden>✕</i>}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function Home() {
@@ -449,43 +511,93 @@ export default function Home() {
 }
 
 function QuestionRound({ kind, limit }: { kind: "Learn" | "Test"; limit: number }) {
+  const unlimited = kind === "Learn";
   const { deck, reshuffle } = useShuffledDeck();
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
+  const [answered, setAnswered] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [missedCurrent, setMissedCurrent] = useState(false);
+  const [highScore, setHighScore] = useState(0);
   const [style, setStyle] = useState<AnswerStyle>("multiple");
   const [choice, setChoice] = useState("");
   const [written, setWritten] = useState("");
   const [result, setResult] = useState<"correct" | "wrong" | null>(null);
+  const [eliminated, setEliminated] = useState<Set<string>>(() => new Set());
   const total = Math.min(limit, deck.length);
   const item = deck[index];
-  const finished = index >= total;
+  const finished = !unlimited && index >= total;
+  const accuracy = answered > 0 ? Math.round((correctCount / answered) * 100) : 0;
+
+  useEffect(() => {
+    if (unlimited) setHighScore(readLearnHighScore());
+  }, [unlimited]);
+
+  function clearPromptState() {
+    setChoice("");
+    setWritten("");
+    setResult(null);
+    setEliminated(new Set());
+    setMissedCurrent(false);
+  }
 
   function check(value: string) {
-    if (result || finished) return;
+    if (result || finished || eliminated.has(value)) return;
     const right = answerMatches(value, item);
-    setResult(right ? "correct" : "wrong");
-    if (right) setScore((current) => current + 1);
+    setChoice(value);
+    if (right) {
+      setResult("correct");
+      if (!unlimited) setScore((current) => current + 1);
+      return;
+    }
+    setResult("wrong");
+    setMissedCurrent(true);
+    setEliminated((current) => new Set(current).add(value));
+  }
+
+  function retry() {
+    setResult(null);
+    setChoice("");
+    setWritten("");
   }
 
   function next() {
+    if (unlimited) {
+      setAnswered((current) => current + 1);
+      if (!missedCurrent) setCorrectCount((current) => current + 1);
+      if (index + 1 >= deck.length) {
+        reshuffle();
+        setIndex(0);
+      } else {
+        setIndex((current) => current + 1);
+      }
+      clearPromptState();
+      return;
+    }
+
     if (index + 1 >= total) {
       setIndex(total);
       setResult(null);
       return;
     }
     setIndex((current) => current + 1);
-    setChoice("");
-    setWritten("");
-    setResult(null);
+    clearPromptState();
   }
 
   function restart() {
+    if (unlimited) {
+      const nextHigh = Math.max(highScore, accuracy);
+      if (nextHigh > highScore) {
+        saveLearnHighScore(nextHigh);
+        setHighScore(nextHigh);
+      }
+      setAnswered(0);
+      setCorrectCount(0);
+    }
     reshuffle();
     setIndex(0);
     setScore(0);
-    setChoice("");
-    setWritten("");
-    setResult(null);
+    clearPromptState();
   }
 
   if (finished) {
@@ -504,38 +616,59 @@ function QuestionRound({ kind, limit }: { kind: "Learn" | "Test"; limit: number 
   return (
     <div className="quiz-panel">
       <div className="quiz-meta">
-        <span>Question {index + 1} of {total}</span>
-        <span>{score} correct</span>
+        {unlimited ? (
+          <>
+            <span>Question {answered + 1}</span>
+            <span>{accuracy}% accuracy · Best {highScore}%</span>
+          </>
+        ) : (
+          <>
+            <span>Question {index + 1} of {total}</span>
+            <span>{score} correct</span>
+          </>
+        )}
       </div>
-      <div className="quiz-progress"><span style={{ width: `${((index + 1) / total) * 100}%` }} /></div>
+      {unlimited ? (
+        <div className="quiz-meta-actions">
+          <div className="quiz-progress"><span style={{ width: `${accuracy}%` }} /></div>
+          <button type="button" className="score-reset" onClick={restart}>Reset & save best</button>
+        </div>
+      ) : (
+        <div className="quiz-progress"><span style={{ width: `${((index + 1) / total) * 100}%` }} /></div>
+      )}
       <div className="answer-style" role="group" aria-label="Answer style">
-        <button className={style === "multiple" ? "active" : ""} onClick={() => { setStyle("multiple"); setResult(null); }}>Multiple choice</button>
-        <button className={style === "written" ? "active" : ""} onClick={() => { setStyle("written"); setResult(null); }}>Written answer</button>
+        <button className={style === "multiple" ? "active" : ""} onClick={() => { setStyle("multiple"); setResult(null); setChoice(""); }}>Multiple choice</button>
+        <button className={style === "written" ? "active" : ""} onClick={() => { setStyle("written"); setResult(null); setChoice(""); }}>Written answer</button>
       </div>
       <span className="question-label">{kind === "Test" ? "Choose the correct year" : "Recall the date"}</span>
       <h4>{item.title}</h4>
       {style === "multiple" ? (
-        <div className="choice-grid">
-          {optionsFor(item, deck).map((option, optionIndex) => (
-            <button
-              key={option}
-              onClick={() => { setChoice(option); check(option); }}
-              className={`${choice === option ? "chosen" : ""} ${result && option === item.year ? "right" : ""} ${result === "wrong" && choice === option ? "wrong-choice" : ""}`}
-            >
-              <span>{String.fromCharCode(65 + optionIndex)}</span>{option}
-            </button>
-          ))}
-        </div>
+        <QuizChoiceGrid
+          item={item}
+          choice={choice}
+          result={result}
+          eliminated={eliminated}
+          onChoose={check}
+        />
       ) : (
         <form className="written-form" onSubmit={(event) => { event.preventDefault(); check(written); }}>
-          <input value={written} onChange={(event) => setWritten(event.target.value)} placeholder="Type the year, including BCE when needed" />
-          <button type="submit">Check answer</button>
+          <input value={written} onChange={(event) => setWritten(event.target.value)} placeholder="Type the year, including BCE when needed" disabled={Boolean(result)} />
+          <button type="submit" disabled={Boolean(result)}>Check answer</button>
         </form>
       )}
-      {result && (
-        <div className={`feedback ${result}`}>
-          <div><b>{result === "correct" ? "Exactly right" : "Not quite"}</b><span>{item.year} · {item.exactDate}</span></div>
-          <button onClick={next}>Next →</button>
+      {result === "correct" && (
+        <div className="feedback correct">
+          <div><b>Exactly right</b><span>{item.year} · {item.exactDate}</span></div>
+          <button type="button" onClick={next}>Next →</button>
+        </div>
+      )}
+      {result === "wrong" && (
+        <div className="feedback wrong">
+          <div>
+            <b>Not quite</b>
+            <span>{unlimited ? "That choice is out · accuracy takes a hit" : "That choice is out · try again"}</span>
+          </div>
+          <button type="button" onClick={retry}>Retry</button>
         </div>
       )}
     </div>
@@ -547,36 +680,58 @@ function BlockBlastGame() {
   const [phase, setPhase] = useState<"questions" | "blast">("questions");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [questionsThisRound, setQuestionsThisRound] = useState(0);
+  const [answered, setAnswered] = useState(0);
   const [choice, setChoice] = useState("");
   const [result, setResult] = useState<"correct" | "wrong" | null>(null);
+  const [eliminated, setEliminated] = useState<Set<string>>(() => new Set());
   const [grid, setGrid] = useState(createEmptyGrid);
   const [pieces, setPieces] = useState<BlastPiece[]>(() => randomPieces());
   const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
+  const [draggingPieceId, setDraggingPieceId] = useState<string | null>(null);
   const [hoverCell, setHoverCell] = useState<[number, number] | null>(null);
   const [movesLeft, setMovesLeft] = useState(BLAST_MOVES);
   const [linesCleared, setLinesCleared] = useState(0);
+  const [piecesPlaced, setPiecesPlaced] = useState(0);
   const [score, setScore] = useState(0);
-  const [finished, setFinished] = useState(false);
 
   const item = deck[questionIndex];
   const questionsUntilBlast = QUESTIONS_PER_BLAST - questionsThisRound;
 
+  function clearQuestionState() {
+    setChoice("");
+    setResult(null);
+    setEliminated(new Set());
+  }
+
   function checkAnswer(option: string) {
-    if (result || finished || phase !== "questions") return;
-    const right = answerMatches(option, item);
-    setResult(right ? "correct" : "wrong");
-    if (right) setScore((value) => value + 1);
+    if (result || phase !== "questions" || eliminated.has(option)) return;
+    setChoice(option);
+    if (answerMatches(option, item)) {
+      setResult("correct");
+      return;
+    }
+    setResult("wrong");
+    setEliminated((current) => new Set(current).add(option));
+    setScore((value) => Math.max(0, value - WRONG_PENALTY));
+  }
+
+  function retryAnswer() {
+    setResult(null);
+    setChoice("");
+  }
+
+  function goToNextQuestionIndex(fromIndex: number) {
+    if (fromIndex + 1 >= deck.length) {
+      reshuffle();
+      return 0;
+    }
+    return fromIndex + 1;
   }
 
   function advanceQuestion() {
-    const nextQuestionIndex = questionIndex + 1;
     const nextQuestionsThisRound = questionsThisRound + 1;
-
-    if (nextQuestionIndex >= deck.length) {
-      setFinished(true);
-      setResult(null);
-      return;
-    }
+    const nextQuestionIndex = goToNextQuestionIndex(questionIndex);
+    setAnswered((value) => value + 1);
 
     if (nextQuestionsThisRound >= QUESTIONS_PER_BLAST) {
       setQuestionIndex(nextQuestionIndex);
@@ -585,20 +740,20 @@ function BlockBlastGame() {
       setMovesLeft(BLAST_MOVES);
       setPieces(randomPieces());
       setSelectedPieceId(null);
-      setResult(null);
-      setChoice("");
+      setDraggingPieceId(null);
+      setHoverCell(null);
+      clearQuestionState();
       return;
     }
 
     setQuestionIndex(nextQuestionIndex);
     setQuestionsThisRound(nextQuestionsThisRound);
-    setResult(null);
-    setChoice("");
+    clearQuestionState();
   }
 
-  function placeOnGrid(row: number, col: number) {
-    if (phase !== "blast" || !selectedPieceId || movesLeft <= 0) return;
-    const piece = pieces.find((entry) => entry.id === selectedPieceId);
+  function placeOnGrid(row: number, col: number, pieceId = selectedPieceId) {
+    if (phase !== "blast" || !pieceId || movesLeft <= 0) return;
+    const piece = pieces.find((entry) => entry.id === pieceId);
     if (!piece) return;
 
     const anchor = findAnchorForCell(grid, piece.cells, row, col);
@@ -606,14 +761,18 @@ function BlockBlastGame() {
 
     const placed = placePiece(grid, piece.cells, anchor.row, anchor.col, piece.color);
     const { grid: clearedGrid, cleared } = clearCompletedLines(placed);
-    const remainingPieces = pieces.filter((entry) => entry.id !== selectedPieceId);
+    const remainingPieces = pieces.filter((entry) => entry.id !== pieceId);
     const nextMoves = movesLeft - 1;
+    const piecePoints = piece.cells.length * 5;
+    const linePoints = cleared * 20;
 
     setGrid(clearedGrid);
     setLinesCleared((value) => value + cleared);
-    setScore((value) => value + cleared * 10);
+    setPiecesPlaced((value) => value + 1);
+    setScore((value) => value + piecePoints + linePoints);
     setMovesLeft(nextMoves);
     setSelectedPieceId(null);
+    setDraggingPieceId(null);
     setHoverCell(null);
     setPieces(remainingPieces.length ? remainingPieces : randomPieces());
 
@@ -624,13 +783,11 @@ function BlockBlastGame() {
     setPhase("questions");
     setQuestionsThisRound(0);
     setSelectedPieceId(null);
+    setDraggingPieceId(null);
     setHoverCell(null);
     setMovesLeft(BLAST_MOVES);
     setPieces(randomPieces());
-
-    if (questionIndex >= deck.length - 1) {
-      setFinished(true);
-    }
+    clearQuestionState();
   }
 
   function restart() {
@@ -638,19 +795,21 @@ function BlockBlastGame() {
     setPhase("questions");
     setQuestionIndex(0);
     setQuestionsThisRound(0);
-    setChoice("");
-    setResult(null);
+    setAnswered(0);
+    clearQuestionState();
     setGrid(createEmptyGrid());
     setPieces(randomPieces());
     setSelectedPieceId(null);
+    setDraggingPieceId(null);
     setHoverCell(null);
     setMovesLeft(BLAST_MOVES);
     setLinesCleared(0);
+    setPiecesPlaced(0);
     setScore(0);
-    setFinished(false);
   }
 
-  const selectedPiece = pieces.find((entry) => entry.id === selectedPieceId) ?? null;
+  const activePieceId = draggingPieceId ?? selectedPieceId;
+  const selectedPiece = pieces.find((entry) => entry.id === activePieceId) ?? null;
   const anyPieceFits = pieces.some((piece) => pieceFitsAnywhere(grid, piece.cells));
   const hoverAnchor =
     selectedPiece && hoverCell
@@ -660,52 +819,39 @@ function BlockBlastGame() {
     ? new Set(pieceCellsAtAnchor(selectedPiece!.cells, hoverAnchor.row, hoverAnchor.col).map(([r, c]) => `${r}-${c}`))
     : null;
 
-  if (finished) {
-    return (
-      <div className="blast-game">
-        <div className="blast-score">
-          <span><b>{score}</b> score</span>
-          <span><b>{linesCleared}</b> lines</span>
-          <span><b>{deck.length}</b> events</span>
-        </div>
-        <div className="blast-core">
-          <div className="game-over">
-            <span className="question-label">Block Blast complete</span>
-            <h4>You cleared the full shuffled deck</h4>
-            <button className="primary-button" onClick={restart}>Play again →</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (phase === "questions") {
     return (
       <div className="blast-game">
         <div className="blast-score">
-          <span><b>{questionIndex + 1}</b> of {deck.length}</span>
+          <span><b>{answered + 1}</b> question</span>
           <span><b>{questionsUntilBlast}</b> until blast</span>
           <span><b>{score}</b> score</span>
         </div>
         <div className="blast-core">
-          <span className="question-label">Answer 5 questions to unlock Block Blast</span>
-          <h4>{item.title}</h4>
-          <div className="choice-grid">
-            {optionsFor(item, deck).map((option, optionIndex) => (
-              <button
-                key={option}
-                onClick={() => { setChoice(option); checkAnswer(option); }}
-                className={`${choice === option ? "chosen" : ""} ${result && option === item.year ? "right" : ""}`}
-                disabled={Boolean(result)}
-              >
-                <span>{String.fromCharCode(65 + optionIndex)}</span>{option}
-              </button>
-            ))}
+          <div className="blast-meta-row">
+            <span className="question-label">Answer 5 questions to unlock Block Blast</span>
+            <button type="button" className="score-reset" onClick={restart}>Reset score</button>
           </div>
-          {result && (
-            <div className={`feedback ${result}`}>
-              <div><b>{result === "correct" ? "Exactly right" : "Not quite"}</b><span>{item.year} · {item.exactDate}</span></div>
-              <button onClick={advanceQuestion}>{questionsThisRound + 1 >= QUESTIONS_PER_BLAST ? "Start Block Blast →" : "Next question →"}</button>
+          <h4>{item.title}</h4>
+          <QuizChoiceGrid
+            item={item}
+            choice={choice}
+            result={result}
+            eliminated={eliminated}
+            onChoose={checkAnswer}
+          />
+          {result === "correct" && (
+            <div className="feedback correct">
+              <div><b>Exactly right</b><span>{item.year} · {item.exactDate}</span></div>
+              <button type="button" onClick={advanceQuestion}>
+                {questionsThisRound + 1 >= QUESTIONS_PER_BLAST ? "Start Block Blast →" : "Next question →"}
+              </button>
+            </div>
+          )}
+          {result === "wrong" && (
+            <div className="feedback wrong">
+              <div><b>Not quite</b><span>−{WRONG_PENALTY} points · that choice is out</span></div>
+              <button type="button" onClick={retryAnswer}>Retry</button>
             </div>
           )}
         </div>
@@ -717,18 +863,25 @@ function BlockBlastGame() {
     <div className="blast-game">
       <div className="blast-score">
         <span><b>{movesLeft}</b> moves left</span>
-        <span><b>{linesCleared}</b> lines cleared</span>
+        <span><b>{piecesPlaced}</b> pieces</span>
         <span><b>{score}</b> score</span>
       </div>
       <div className="blast-core block-blast-board">
         <div className="block-blast-header">
-          <p>Place {BLAST_MOVES} blocks to clear rows and columns, then return to the quiz.</p>
+          <p>Drag blocks onto the board. Score comes from piece size and cleared lines ({linesCleared} cleared).</p>
           {!anyPieceFits && (
-            <button className="quiet-button" onClick={finishBlastRound}>Skip</button>
+            <button type="button" className="quiet-button" onClick={finishBlastRound}>Skip</button>
           )}
         </div>
 
-        <div className="blast-grid" role="grid" aria-label="Block Blast board">
+        <div
+          className="blast-grid"
+          role="grid"
+          aria-label="Block Blast board"
+          onDragLeave={() => {
+            if (!draggingPieceId) setHoverCell(null);
+          }}
+        >
           {grid.map((row, rowIndex) =>
             row.map((cell, colIndex) => {
               const preview = hoverFootprint?.has(`${rowIndex}-${colIndex}`) ?? false;
@@ -739,6 +892,7 @@ function BlockBlastGame() {
               return (
                 <button
                   key={`${rowIndex}-${colIndex}`}
+                  type="button"
                   className={`blast-cell ${cell ? "filled" : ""} ${preview ? "preview" : ""} ${canDrop && !preview ? "droppable" : ""}`}
                   style={
                     cell
@@ -748,7 +902,19 @@ function BlockBlastGame() {
                         : undefined
                   }
                   onMouseEnter={() => setHoverCell([rowIndex, colIndex])}
-                  onMouseLeave={() => setHoverCell(null)}
+                  onMouseLeave={() => {
+                    if (!draggingPieceId) setHoverCell(null);
+                  }}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                    setHoverCell([rowIndex, colIndex]);
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    const pieceId = event.dataTransfer.getData("text/piece-id") || draggingPieceId || selectedPieceId;
+                    placeOnGrid(rowIndex, colIndex, pieceId);
+                  }}
                   onClick={() => placeOnGrid(rowIndex, colIndex)}
                   aria-label={cell ? "Filled cell" : "Empty cell"}
                 />
@@ -757,31 +923,51 @@ function BlockBlastGame() {
           )}
         </div>
 
-        <div className="blast-tray" aria-label="Available blocks">
-          {pieces.map((piece) => (
-            <button
-              key={piece.id}
-              className={`blast-piece ${selectedPieceId === piece.id ? "selected" : ""} ${pieceFitsAnywhere(grid, piece.cells) ? "" : "disabled"}`}
-              onClick={() => {
-                setSelectedPieceId(piece.id);
-                setHoverCell(null);
-              }}
-              disabled={!pieceFitsAnywhere(grid, piece.cells)}
-            >
-              <span
-                className="blast-piece-grid"
-                style={{
-                  gridTemplateColumns: `repeat(${Math.max(...piece.cells.map(([, col]) => col)) + 1}, 12px)`,
+        <div className="blast-tray" aria-label="Available blocks. Drag onto the board.">
+          {pieces.map((piece) => {
+            const fits = pieceFitsAnywhere(grid, piece.cells);
+            return (
+              <button
+                key={piece.id}
+                type="button"
+                draggable={fits}
+                className={`blast-piece ${selectedPieceId === piece.id ? "selected" : ""} ${draggingPieceId === piece.id ? "dragging" : ""} ${fits ? "" : "disabled"}`}
+                onClick={() => {
+                  if (!fits) return;
+                  setSelectedPieceId(piece.id);
+                  setHoverCell(null);
                 }}
+                onDragStart={(event) => {
+                  if (!fits) {
+                    event.preventDefault();
+                    return;
+                  }
+                  event.dataTransfer.setData("text/piece-id", piece.id);
+                  event.dataTransfer.effectAllowed = "move";
+                  setSelectedPieceId(piece.id);
+                  setDraggingPieceId(piece.id);
+                }}
+                onDragEnd={() => {
+                  setDraggingPieceId(null);
+                  setHoverCell(null);
+                }}
+                disabled={!fits}
               >
-                {renderPieceCells(piece)}
-              </span>
-            </button>
-          ))}
+                <span
+                  className="blast-piece-grid"
+                  style={{
+                    gridTemplateColumns: `repeat(${Math.max(...piece.cells.map(([, col]) => col)) + 1}, 12px)`,
+                  }}
+                >
+                  {renderPieceCells(piece)}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="blast-actions">
-          <button className="primary-button blast-finish" onClick={finishBlastRound}>Finish round →</button>
+          <button type="button" className="primary-button blast-finish" onClick={finishBlastRound}>Finish round →</button>
         </div>
       </div>
     </div>
@@ -810,26 +996,71 @@ function renderPieceCells(piece: BlastPiece) {
 function CharmsGame() {
   const { deck, reshuffle } = useShuffledDeck();
   const [index, setIndex] = useState(0);
+  const [answered, setAnswered] = useState(0);
   const [hearts, setHearts] = useState(3);
   const [charms, setCharms] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const [score, setScore] = useState(0);
+  const [choice, setChoice] = useState("");
+  const [result, setResult] = useState<"correct" | "wrong" | null>(null);
+  const [eliminated, setEliminated] = useState<Set<string>>(() => new Set());
   const item = deck[index];
-  const finished = hearts === 0 || index >= deck.length;
+  const finished = hearts === 0;
+
+  function clearPromptState() {
+    setChoice("");
+    setResult(null);
+    setEliminated(new Set());
+  }
 
   function choose(option: string) {
-    if (finished) return;
-    if (option === item.year) {
+    if (finished || result || eliminated.has(option)) return;
+    setChoice(option);
+    if (answerMatches(option, item)) {
+      const nextStreak = streak + 1;
+      const gained = 10 + (nextStreak - 1) * 5;
+      setResult("correct");
+      setStreak(nextStreak);
+      setBestStreak((current) => Math.max(current, nextStreak));
       setCharms((value) => value + 1);
-      setIndex((value) => value + 1);
-    } else {
-      setHearts((value) => Math.max(0, value - 1));
+      setScore((value) => value + gained);
+      return;
     }
+    setResult("wrong");
+    setEliminated((current) => new Set(current).add(option));
+    setStreak(0);
+    setScore((value) => Math.max(0, value - WRONG_PENALTY));
+    setHearts((value) => Math.max(0, value - 1));
+  }
+
+  function retry() {
+    if (hearts === 0) return;
+    setResult(null);
+    setChoice("");
+  }
+
+  function next() {
+    setAnswered((value) => value + 1);
+    if (index + 1 >= deck.length) {
+      reshuffle();
+      setIndex(0);
+    } else {
+      setIndex((value) => value + 1);
+    }
+    clearPromptState();
   }
 
   function reset() {
     reshuffle();
     setHearts(3);
     setCharms(0);
+    setStreak(0);
+    setBestStreak(0);
+    setScore(0);
+    setAnswered(0);
     setIndex(0);
+    clearPromptState();
   }
 
   return (
@@ -837,26 +1068,42 @@ function CharmsGame() {
       <div className="charms-header">
         <span className="charm-gem">⬟</span>
         <div>
-          <b>{charms} charms</b>
-          <span>Question {Math.min(index + 1, deck.length)} of {deck.length} · every event, shuffled</span>
+          <b>{score} score</b>
+          <span>
+            {charms} right · streak {streak} · best {bestStreak} · Q{answered + 1}
+          </span>
         </div>
         <span className="hearts">{"♥".repeat(hearts)}{"♡".repeat(3 - hearts)}</span>
       </div>
       {!finished ? (
         <div className="charm-question">
-          <span className="question-label">Protect your hearts</span>
+          <span className="question-label">Protect your hearts · score builds with streaks</span>
           <h4>{item.title}</h4>
-          <div className="choice-grid">
-            {optionsFor(item, deck).map((option) => (
-              <button key={option} onClick={() => choose(option)}>{option}</button>
-            ))}
-          </div>
+          <QuizChoiceGrid
+            item={item}
+            choice={choice}
+            result={result}
+            eliminated={eliminated}
+            onChoose={choose}
+          />
+          {result === "correct" && (
+            <div className="feedback correct">
+              <div><b>Exactly right</b><span>{item.year} · streak {streak}</span></div>
+              <button type="button" onClick={next}>Next →</button>
+            </div>
+          )}
+          {result === "wrong" && hearts > 0 && (
+            <div className="feedback wrong">
+              <div><b>Not quite</b><span>−{WRONG_PENALTY} points · heart lost · that choice is out</span></div>
+              <button type="button" onClick={retry}>Retry</button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="game-over">
           <span className="charm-gem">⬟</span>
-          <h4>{hearts ? `You collected ${charms} charms` : `Run ended with ${charms} charms`}</h4>
-          <p>{index >= deck.length ? "You made it through the full shuffled deck." : "You ran out of hearts before finishing the deck."}</p>
+          <h4>Run ended with {score} points</h4>
+          <p>{charms} correct · best streak {bestStreak}. You ran out of hearts.</p>
           <button className="primary-button" onClick={reset}>Try another run</button>
         </div>
       )}

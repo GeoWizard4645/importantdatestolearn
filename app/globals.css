@@ -227,21 +227,31 @@ a { color: inherit; text-decoration: none; }
 
 .quiz-panel, .pair-game, .blast-game, .charms-game { max-width: 880px; margin: 0 auto; background: white; border: 1px solid #e4e7ef; border-radius: 20px; padding: clamp(28px, 5vw, 54px); box-shadow: 0 16px 45px rgba(31, 45, 73, .07); }
 .quiz-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; font-weight: 800; }
+.quiz-meta-actions { display: flex; align-items: center; gap: 12px; margin: 12px 0 28px; }
+.quiz-meta-actions .quiz-progress { flex: 1; margin: 0; }
 .quiz-progress { margin: 12px 0 28px; }
+.score-reset { border: 1px solid var(--line); background: white; border-radius: 9px; padding: 8px 12px; cursor: pointer; color: var(--ink); font-size: 11px; font-weight: 800; white-space: nowrap; }
+.score-reset:hover { border-color: var(--blue); color: var(--blue); }
 .answer-style { display: inline-flex; padding: 4px; margin-bottom: 45px; border-radius: 10px; background: #eff1f6; }
 .answer-style button { border: 0; border-radius: 7px; padding: 8px 12px; background: transparent; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 800; }
 .answer-style button.active { background: white; color: var(--ink); box-shadow: 0 2px 7px rgba(23,34,56,.08); }
 .quiz-panel h4, .game-intro h4, .blast-core h4, .charm-question h4, .game-over h4 { max-width: 710px; margin: 10px 0 32px; font-family: Georgia, serif; font-size: clamp(26px, 3.2vw, 40px); line-height: 1.17; letter-spacing: -.025em; }
 .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.choice-grid button { min-height: 62px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 2px solid #e0e4ed; border-radius: 12px; background: white; cursor: pointer; font-weight: 800; text-align: left; }
-.choice-grid button:hover, .choice-grid button.chosen { border-color: var(--blue); background: #f5f6ff; }
+.choice-grid button { position: relative; min-height: 62px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 2px solid #e0e4ed; border-radius: 12px; background: white; cursor: pointer; font-weight: 800; text-align: left; }
+.choice-grid button:hover:not(:disabled), .choice-grid button.chosen { border-color: var(--blue); background: #f5f6ff; }
 .choice-grid button.right { border-color: #34b276; background: #edf9f3; }
 .choice-grid button.wrong-choice { border-color: #e07a66; background: #fff0ec; }
-.choice-grid button > span { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 7px; background: #eff1f7; font-size: 11px; }
+.choice-grid button.eliminated { opacity: .55; cursor: not-allowed; background: #f4f5f8; border-color: #d7dbe5; text-decoration: line-through; }
+.choice-grid button.eliminated em, .choice-grid button.wrong-choice em { text-decoration: line-through; }
+.choice-grid button > span { display: grid; place-items: center; flex: 0 0 27px; width: 27px; height: 27px; border-radius: 7px; background: #eff1f7; font-size: 11px; }
+.choice-grid button em { flex: 1; font-style: normal; }
+.choice-grid button .choice-x { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #d1553f; font-style: normal; font-size: 18px; font-weight: 900; line-height: 1; }
+.choice-grid button:disabled { cursor: default; }
 .written-form { display: flex; gap: 10px; }
 .written-form input { flex: 1; min-width: 0; padding: 16px; border: 2px solid #dfe3ec; border-radius: 12px; outline: none; }
 .written-form input:focus { border-color: var(--blue); }
 .written-form button { border: 0; border-radius: 12px; padding: 0 18px; background: var(--blue); color: white; font-weight: 800; cursor: pointer; }
+.written-form button:disabled, .written-form input:disabled { opacity: .7; cursor: not-allowed; }
 .feedback { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 18px; padding: 15px 16px; border-radius: 12px; }
 .feedback.correct { background: #e9f8f0; color: #177046; }.feedback.wrong { background: #fff0ec; color: #a53e2d; }
 .feedback b, .feedback span { display: block; }.feedback span { margin-top: 3px; font-size: 12px; }
@@ -264,6 +274,8 @@ a { color: inherit; text-decoration: none; }
 .blast-score span { padding: 12px 10px; border-right: 1px solid rgba(255,255,255,.18); text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
 .blast-score b { display: block; font-size: 20px; letter-spacing: -.04em; }
 .blast-core { padding: 18px 16px 20px; }
+.blast-meta-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.blast-meta-row .question-label { margin: 0; }
 .block-blast-board { display: flex; flex-direction: column; gap: 14px; }
 .block-blast-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .block-blast-header p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
@@ -273,10 +285,11 @@ a { color: inherit; text-decoration: none; }
 .blast-cell.droppable { cursor: crosshair; }
 .blast-cell.filled { cursor: default; box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .12); }
 .blast-tray { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.blast-piece { min-height: 64px; display: grid; place-items: center; padding: 8px; border: 2px solid #e0e4ed; border-radius: 10px; background: white; cursor: pointer; }
+.blast-piece { min-height: 64px; display: grid; place-items: center; padding: 8px; border: 2px solid #e0e4ed; border-radius: 10px; background: white; cursor: grab; touch-action: none; }
 .blast-piece.selected { border-color: var(--blue); background: #f5f6ff; box-shadow: 0 0 0 2px rgba(66, 85, 255, .12); }
+.blast-piece.dragging { opacity: .45; cursor: grabbing; }
 .blast-piece.disabled { opacity: .35; cursor: not-allowed; }
-.blast-piece-grid { display: grid; gap: 2px; }
+.blast-piece-grid { display: grid; gap: 2px; pointer-events: none; }
 .blast-mini-cell { width: 12px; height: 12px; border-radius: 3px; background: transparent; }
 .blast-mini-cell.filled { box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .12); }
 .blast-actions { display: flex; justify-content: center; }
