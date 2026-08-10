@@ -248,7 +248,7 @@ export default function Home() {
     const needle = search.toLowerCase().trim();
     return events.filter((event) => {
       const inEra = era === "All eras" || event.era === era;
-      const inSearch = !needle || `${event.title} ${event.year} ${event.description}`.toLowerCase().includes(needle);
+      const inSearch = !needle || `${event.title} ${event.year} ${event.description} ${event.simpleExplanation}`.toLowerCase().includes(needle);
       return inEra && inSearch;
     });
   }, [search, era]);
@@ -494,6 +494,7 @@ export default function Home() {
                 </div>
                 <p className="exact-date"><b>Exact date</b> {event.exactDate || "See event description"}</p>
                 <p>{event.description}</p>
+                <p className="simple-explanation"><b>In simpler terms</b> {event.simpleExplanation}</p>
               </article>
             </li>
           ))}

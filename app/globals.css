@@ -317,6 +317,8 @@ a { color: inherit; text-decoration: none; }
 .event-title-line > span { flex: 0 0 auto; padding: 6px 10px; border-radius: 8px; background: #eef0ff; color: var(--blue); font-weight: 900; font-size: 12px; }
 .event-list p { max-width: 880px; margin: 13px 0 0; color: #59657a; line-height: 1.7; font-size: 14px; }
 .event-list .exact-date { margin-top: 8px; color: #818ba0; font-size: 12px; }.exact-date b { margin-right: 7px; color: var(--ink); text-transform: uppercase; letter-spacing: .07em; font-size: 10px; }
+.event-list .simple-explanation { margin-top: 14px; padding: 14px 16px; border-radius: 12px; background: #f4f6fb; color: #4a5568; font-size: 14px; line-height: 1.7; }
+.event-list .simple-explanation b { display: block; margin-bottom: 6px; color: var(--ink); text-transform: uppercase; letter-spacing: .07em; font-size: 10px; }
 .empty-state { max-width: 1120px; margin: 0 auto; padding: 70px; background: #f6f7fa; border-radius: 16px; color: var(--muted); text-align: center; }
 
 footer { display: flex; align-items: center; justify-content: space-between; gap: 30px; padding: 35px clamp(24px, 6vw, 90px); background: var(--navy); color: white; }
