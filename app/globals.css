@@ -269,14 +269,14 @@ a { color: inherit; text-decoration: none; }
 .round-complete button { border: 0; background: transparent; cursor: pointer; color: inherit; font-weight: 800; }
 .blocks .pair-columns button { border-radius: 5px; box-shadow: 3px 3px 0 #dce1eb; }
 
-.blast-game { padding: 0; overflow: hidden; max-width: 420px; margin: 0 auto; }
+.blast-game { padding: 0; overflow: hidden; max-width: 880px; margin: 0 auto; }
 .blast-score { display: grid; grid-template-columns: repeat(3, 1fr); background: linear-gradient(120deg, var(--blue), #7b4ae8); color: white; }
-.blast-score span { padding: 12px 10px; border-right: 1px solid rgba(255,255,255,.18); text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
-.blast-score b { display: block; font-size: 20px; letter-spacing: -.04em; }
-.blast-core { padding: 18px 16px 20px; }
+.blast-score span { padding: 14px 12px; border-right: 1px solid rgba(255,255,255,.18); text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+.blast-score b { display: block; font-size: 22px; letter-spacing: -.04em; }
+.blast-core { padding: clamp(28px, 5vw, 54px); }
 .blast-meta-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
 .blast-meta-row .question-label { margin: 0; }
-.block-blast-board { display: flex; flex-direction: column; gap: 14px; }
+.block-blast-board { display: flex; flex-direction: column; gap: 14px; max-width: 420px; margin: 0 auto; padding: 18px 16px 20px; }
 .block-blast-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .block-blast-header p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
 .blast-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 3px; width: min(100%, 280px); margin: 0 auto; padding: 10px; border-radius: 12px; background: #eef1f8; border: 1px solid #dde3ef; }
@@ -339,7 +339,7 @@ footer p { color: #9ba6bd; font-size: 12px; } footer > a { font-size: 12px; font
   .mode-rail button { padding: 8px; }.mode-rail button > span:last-child { display: none; }.mode-mark { width: 38px; }
   .study-app { margin: 0 -10px; border-radius: 18px; }.study-workspace { padding: 24px 14px 38px; min-height: auto; }.workspace-topbar { padding: 0 4px; }
   .flashcard { min-height: 430px; }.card-face { padding: 30px 22px; }.card-front strong { font-size: 33px; }.answer-year { font-size: 46px; }.answer-description { font-size: 12px; }.deck-tools { flex-wrap: wrap; }.deck-tools span { width: 100%; text-align: center; }
-  .quiz-panel, .pair-game, .blast-game, .charms-game { padding: 24px 18px; }.blast-game { padding: 0; }.blast-core { padding: 16px 14px 18px; }
+  .quiz-panel, .pair-game, .blast-game, .charms-game { padding: 24px 18px; }.blast-game { padding: 0; }.blast-core { padding: 24px 18px; }.block-blast-board { padding: 16px 14px 18px; }
   .choice-grid { grid-template-columns: 1fr; }.written-form { flex-direction: column; }.written-form button { min-height: 48px; }.feedback { align-items: stretch; flex-direction: column; }
   .pair-columns { grid-template-columns: 1.35fr .75fr; gap: 8px; }.pair-columns button { font-size: 11px; padding: 9px; }.game-intro h4 { font-size: 26px; }
   .charms-header { grid-template-columns: auto 1fr; }.hearts { grid-column: 1 / -1; }
