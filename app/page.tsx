@@ -4,18 +4,39 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import sourceEvents from "./events.json";
 
 type EventItem = (typeof sourceEvents)[number];
-type Mode = "flashcards" | "learn" | "test" | "blocks" | "blast" | "match" | "charms";
+type Mode = "learn" | "test" | "blockblast" | "charms";
 type AnswerStyle = "multiple" | "written";
 
 const modes: { id: Mode; label: string; mark: string; note: string }[] = [
-  { id: "flashcards", label: "Flashcards", mark: "▰", note: "Flip and review" },
-  { id: "learn", label: "Learn", mark: "✦", note: "Practice two ways" },
+  { id: "learn", label: "Learn", mark: "✦", note: "All events, two ways" },
   { id: "test", label: "Test", mark: "▤", note: "10-question rounds" },
-  { id: "blocks", label: "Blocks", mark: "▦", note: "Build the pairs" },
-  { id: "blast", label: "Blast", mark: "◆", note: "Race the clock" },
-  { id: "match", label: "Match", mark: "▭", note: "Clear the board" },
+  { id: "blockblast", label: "Block Blast", mark: "◆", note: "Quiz, then 5 moves" },
   { id: "charms", label: "Charms", mark: "⬟", note: "Keep your hearts" },
 ];
+
+const BLAST_GRID_SIZE = 8;
+const QUESTIONS_PER_BLAST = 5;
+const BLAST_MOVES = 5;
+const PIECE_COLORS = ["#4255ff", "#6c45e9", "#5a58e9", "#34b276", "#e5a500", "#7b4ae8"];
+
+const BLAST_SHAPES: [number, number][][] = [
+  [[0, 0]],
+  [[0, 0], [1, 0]],
+  [[0, 0], [0, 1]],
+  [[0, 0], [1, 0], [0, 1], [1, 1]],
+  [[0, 0], [1, 0], [2, 0]],
+  [[0, 0], [0, 1], [0, 2]],
+  [[0, 0], [1, 0], [0, 1]],
+  [[0, 0], [1, 0], [1, 1], [2, 1]],
+  [[0, 0], [1, 0], [2, 0], [3, 0]],
+  [[0, 0], [0, 1], [1, 1], [2, 1]],
+];
+
+type BlastPiece = {
+  id: string;
+  cells: [number, number][];
+  color: string;
+};
 
 function chronologyValue(year: string) {
   const number = Number((year.match(/[\d,]+/)?.[0] ?? "0").replaceAll(",", ""));
@@ -27,6 +48,15 @@ const events = [...sourceEvents].sort((a, b) => {
   return byYear || a.sourceOrder - b.sourceOrder;
 });
 
+function shuffleArray<T>(items: T[]) {
+  const next = [...items];
+  for (let i = next.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [next[i], next[j]] = [next[j], next[i]];
+  }
+  return next;
+}
+
 function splitIntoRows<T>(items: T[], size: number) {
   const rows: T[][] = [];
   for (let i = 0; i < items.length; i += size) rows.push(items.slice(i, i + size));
@@ -34,14 +64,14 @@ function splitIntoRows<T>(items: T[], size: number) {
 }
 
 function compactYear(year: string) {
-  return year.replace(" CE", "").replace("c. ", "c. ");
+  return year.replace(" CE", "").replace("c. ", "c. ");
 }
 
-function optionsFor(item: EventItem, count = 4) {
-  const at = events.findIndex((event) => event.title === item.title);
+function optionsFor(item: EventItem, pool: EventItem[], count = 4) {
+  const at = pool.findIndex((event) => event.title === item.title);
   const offsets = [0, 7, 17, 31, 43, 58];
   const values = offsets
-    .map((offset) => events[(at + offset) % events.length].year)
+    .map((offset) => pool[(at + offset + pool.length) % pool.length].year)
     .filter((value, index, all) => all.indexOf(value) === index)
     .slice(0, count);
   const turn = Math.abs(at) % values.length;
@@ -57,27 +87,75 @@ function answerMatches(value: string, item: EventItem) {
   return given === expected || (given.includes(firstNumber) && (!expected.includes("bce") || given.includes("bce")));
 }
 
-function useCountdown(active: boolean, resetKey: number) {
-  const [seconds, setSeconds] = useState(45);
-  useEffect(() => {
-    setSeconds(45);
-    if (!active) return;
-    const timer = window.setInterval(() => setSeconds((value) => Math.max(0, value - 1)), 1000);
-    return () => window.clearInterval(timer);
-  }, [active, resetKey]);
-  return seconds;
+function createEmptyGrid() {
+  return Array.from({ length: BLAST_GRID_SIZE }, () => Array<string | null>(BLAST_GRID_SIZE).fill(null));
+}
+
+function randomPieces(count = 3) {
+  return Array.from({ length: count }, (_, index) => {
+    const cells = BLAST_SHAPES[Math.floor(Math.random() * BLAST_SHAPES.length)];
+    return {
+      id: `${Date.now()}-${index}-${Math.random()}`,
+      cells,
+      color: PIECE_COLORS[Math.floor(Math.random() * PIECE_COLORS.length)],
+    } satisfies BlastPiece;
+  });
+}
+
+function canPlacePiece(grid: (string | null)[][], cells: [number, number][], row: number, col: number) {
+  return cells.every(([dy, dx]) => {
+    const y = row + dy;
+    const x = col + dx;
+    return y >= 0 && y < BLAST_GRID_SIZE && x >= 0 && x < BLAST_GRID_SIZE && grid[y][x] === null;
+  });
+}
+
+function placePiece(grid: (string | null)[][], cells: [number, number][], row: number, col: number, color: string) {
+  const next = grid.map((line) => [...line]);
+  cells.forEach(([dy, dx]) => {
+    next[row + dy][col + dx] = color;
+  });
+  return next;
+}
+
+function clearCompletedLines(grid: (string | null)[][]) {
+  let cleared = 0;
+  const next = grid.map((line) => [...line]);
+  for (let row = 0; row < BLAST_GRID_SIZE; row++) {
+    if (next[row].every((cell) => cell !== null)) {
+      next[row] = Array<string | null>(BLAST_GRID_SIZE).fill(null);
+      cleared += 1;
+    }
+  }
+  for (let col = 0; col < BLAST_GRID_SIZE; col++) {
+    if (next.every((line) => line[col] !== null)) {
+      for (let row = 0; row < BLAST_GRID_SIZE; row++) next[row][col] = null;
+      cleared += 1;
+    }
+  }
+  return { grid: next, cleared };
+}
+
+function pieceFitsAnywhere(grid: (string | null)[][], cells: [number, number][]) {
+  for (let row = 0; row < BLAST_GRID_SIZE; row++) {
+    for (let col = 0; col < BLAST_GRID_SIZE; col++) {
+      if (canPlacePiece(grid, cells, row, col)) return true;
+    }
+  }
+  return false;
+}
+
+function useShuffledDeck() {
+  const [deck, setDeck] = useState(() => shuffleArray(events));
+  const reshuffle = () => setDeck(shuffleArray(events));
+  return { deck, reshuffle };
 }
 
 export default function Home() {
-  const [mode, setMode] = useState<Mode>("flashcards");
-  const [cardIndex, setCardIndex] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [deck, setDeck] = useState(events);
-  const [starred, setStarred] = useState<Set<string>>(new Set());
+  const [mode, setMode] = useState<Mode>("learn");
   const [timelineIndex, setTimelineIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [era, setEra] = useState("All eras");
-  const card = deck[cardIndex];
   const timelineRows = useMemo(() => splitIntoRows(events, 7), []);
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -90,33 +168,6 @@ export default function Home() {
     });
   }, [search, era]);
 
-  function moveCard(direction: number) {
-    setCardIndex((current) => (current + direction + deck.length) % deck.length);
-    setFlipped(false);
-  }
-
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      const target = event.target as HTMLElement;
-      if (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
-      if (mode !== "flashcards") return;
-      if (event.key === "ArrowRight") {
-        event.preventDefault();
-        moveCard(1);
-      }
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        moveCard(-1);
-      }
-      if (event.key === " " || event.key === "ArrowUp" || event.key === "ArrowDown") {
-        event.preventDefault();
-        setFlipped((value) => !value);
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [mode, deck.length]);
-
   function navigateTimeline(event: React.KeyboardEvent<HTMLDivElement>) {
     const moves: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
     if (!(event.key in moves)) return;
@@ -128,25 +179,7 @@ export default function Home() {
     node?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   }
 
-  function shuffleDeck() {
-    const next = [...deck];
-    for (let i = next.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [next[i], next[j]] = [next[j], next[i]];
-    }
-    setDeck(next);
-    setCardIndex(0);
-    setFlipped(false);
-  }
-
-  function toggleStar() {
-    setStarred((current) => {
-      const next = new Set(current);
-      if (next.has(card.title)) next.delete(card.title);
-      else next.add(card.title);
-      return next;
-    });
-  }
+  const activeMode = modes.find((item) => item.id === mode);
 
   return (
     <main>
@@ -173,7 +206,7 @@ export default function Home() {
         </div>
         <div className="hero-facts" aria-label="Study set summary">
           <span><strong>{events.length}</strong> events</span>
-          <span><strong>7</strong> study modes</span>
+          <span><strong>4</strong> study modes</span>
           <span><strong>c. 10,000 BCE</strong> to <strong>{events[events.length - 1].year}</strong></span>
         </div>
       </section>
@@ -205,9 +238,7 @@ export default function Home() {
                     tabIndex={timelineIndex === index ? 0 : -1}
                     onFocus={() => setTimelineIndex(index)}
                     onClick={() => {
-                      setCardIndex(deck.findIndex((entry) => entry.title === item.title));
-                      setFlipped(false);
-                      setMode("flashcards");
+                      setMode("learn");
                       document.querySelector("#study")?.scrollIntoView({ behavior: "smooth" });
                     }}
                     aria-label={`${item.year}: ${item.title}`}
@@ -230,7 +261,7 @@ export default function Home() {
             <span className="section-kicker">Make it stick</span>
             <h2>Study your way</h2>
           </div>
-          <p>Review, recall, race, and match. Every mode draws from the complete set of {events.length} events.</p>
+          <p>Learn, test, blast blocks, and collect charms. Every mode draws from the complete set of {events.length} events.</p>
         </div>
 
         <div className="study-app">
@@ -251,50 +282,14 @@ export default function Home() {
             <div className="workspace-topbar">
               <div>
                 <span className="workspace-label">World history</span>
-                <h3>{modes.find((item) => item.id === mode)?.label}</h3>
+                <h3>{activeMode?.label}</h3>
               </div>
-              <span className="progress-pill">{mode === "flashcards" ? `${cardIndex + 1} / ${deck.length}` : `All ${events.length} events`}</span>
+              <span className="progress-pill">All {events.length} events</span>
             </div>
 
-            {mode === "flashcards" && (
-              <div className="flashcard-mode">
-                <div className="card-stack">
-                  <button
-                    className={`flashcard ${flipped ? "is-flipped" : ""}`}
-                    onClick={() => setFlipped((value) => !value)}
-                    aria-label={flipped ? "Showing answer. Flip to event." : "Showing event. Flip to answer."}
-                  >
-                    <span className="card-face card-front">
-                      <span className="card-prompt">What year was this?</span>
-                      <strong>{card.title}</strong>
-                      <span className="tap-hint">Click or press space to flip</span>
-                    </span>
-                    <span className="card-face card-back">
-                      <span className="answer-year">{card.year}</span>
-                      <span className="answer-date">{card.exactDate || "Date noted in the description"}</span>
-                      <span className="answer-divider" />
-                      <span className="answer-description">{card.description}</span>
-                    </span>
-                  </button>
-                </div>
-                <div className="card-controls">
-                  <button className="circle-button" onClick={() => moveCard(-1)} aria-label="Previous card">←</button>
-                  <div className="card-progress"><span style={{ width: `${((cardIndex + 1) / deck.length) * 100}%` }} /></div>
-                  <button className="circle-button" onClick={() => moveCard(1)} aria-label="Next card">→</button>
-                </div>
-                <div className="deck-tools">
-                  <button onClick={shuffleDeck}>↝ Shuffle</button>
-                  <button onClick={toggleStar} className={starred.has(card.title) ? "starred" : ""}>☆ {starred.has(card.title) ? "Starred" : "Star"}</button>
-                  <span>Arrow keys move · Space flips</span>
-                </div>
-              </div>
-            )}
-
-            {mode === "learn" && <QuestionRound kind="Learn" />}
+            {mode === "learn" && <QuestionRound kind="Learn" limit={events.length} />}
             {mode === "test" && <QuestionRound kind="Test" limit={10} />}
-            {mode === "blocks" && <PairBoard variant="blocks" />}
-            {mode === "match" && <PairBoard variant="match" />}
-            {mode === "blast" && <BlastGame />}
+            {mode === "blockblast" && <BlockBlastGame />}
             {mode === "charms" && <CharmsGame />}
           </div>
         </div>
@@ -348,37 +343,66 @@ export default function Home() {
   );
 }
 
-function QuestionRound({ kind, limit = events.length }: { kind: "Learn" | "Test"; limit?: number }) {
+function QuestionRound({ kind, limit }: { kind: "Learn" | "Test"; limit: number }) {
+  const { deck, reshuffle } = useShuffledDeck();
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [style, setStyle] = useState<AnswerStyle>("multiple");
   const [choice, setChoice] = useState("");
   const [written, setWritten] = useState("");
   const [result, setResult] = useState<"correct" | "wrong" | null>(null);
-  const total = Math.min(limit, events.length);
-  const item = events[index % total];
+  const total = Math.min(limit, deck.length);
+  const item = deck[index];
+  const finished = index >= total;
 
   function check(value: string) {
-    if (result) return;
+    if (result || finished) return;
     const right = answerMatches(value, item);
     setResult(right ? "correct" : "wrong");
     if (right) setScore((current) => current + 1);
   }
 
   function next() {
-    setIndex((current) => (current + 1) % total);
+    if (index + 1 >= total) {
+      setIndex(total);
+      setResult(null);
+      return;
+    }
+    setIndex((current) => current + 1);
     setChoice("");
     setWritten("");
     setResult(null);
   }
 
+  function restart() {
+    reshuffle();
+    setIndex(0);
+    setScore(0);
+    setChoice("");
+    setWritten("");
+    setResult(null);
+  }
+
+  if (finished) {
+    return (
+      <div className="quiz-panel">
+        <div className="game-over">
+          <span className="question-label">{kind} complete</span>
+          <h4>{score} of {total} correct</h4>
+          <p>You worked through every question in this shuffled round.</p>
+          <button className="primary-button" onClick={restart}>Play another round →</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="quiz-panel">
       <div className="quiz-meta">
-        <span>Question {(index % total) + 1} of {total}</span>
+        <span>Question {index + 1} of {total}</span>
         <span>{score} correct</span>
       </div>
-      <div className="quiz-progress"><span style={{ width: `${(((index % total) + 1) / total) * 100}%` }} /></div>
+      <div className="quiz-progress"><span style={{ width: `${((index + 1) / total) * 100}%` }} /></div>
       <div className="answer-style" role="group" aria-label="Answer style">
         <button className={style === "multiple" ? "active" : ""} onClick={() => { setStyle("multiple"); setResult(null); }}>Multiple choice</button>
         <button className={style === "written" ? "active" : ""} onClick={() => { setStyle("written"); setResult(null); }}>Written answer</button>
@@ -387,11 +411,11 @@ function QuestionRound({ kind, limit = events.length }: { kind: "Learn" | "Test"
       <h4>{item.title}</h4>
       {style === "multiple" ? (
         <div className="choice-grid">
-          {optionsFor(item).map((option, optionIndex) => (
+          {optionsFor(item, deck).map((option, optionIndex) => (
             <button
               key={option}
               onClick={() => { setChoice(option); check(option); }}
-              className={`${choice === option ? "chosen" : ""} ${result && option === item.year ? "right" : ""}`}
+              className={`${choice === option ? "chosen" : ""} ${result && option === item.year ? "right" : ""} ${result === "wrong" && choice === option ? "wrong-choice" : ""}`}
             >
               <span>{String.fromCharCode(65 + optionIndex)}</span>{option}
             </button>
@@ -413,92 +437,300 @@ function QuestionRound({ kind, limit = events.length }: { kind: "Learn" | "Test"
   );
 }
 
-function PairBoard({ variant }: { variant: "blocks" | "match" }) {
-  const [round, setRound] = useState(0);
-  const [selected, setSelected] = useState<{ side: "event" | "year"; title: string } | null>(null);
-  const [matched, setMatched] = useState<Set<string>>(new Set());
-  const set = useMemo(() => Array.from({ length: variant === "blocks" ? 5 : 6 }, (_, index) => events[(round * 6 + index) % events.length]), [round, variant]);
-  const years = [...set].reverse();
+function BlockBlastGame() {
+  const { deck, reshuffle } = useShuffledDeck();
+  const [phase, setPhase] = useState<"questions" | "blast">("questions");
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [questionsThisRound, setQuestionsThisRound] = useState(0);
+  const [choice, setChoice] = useState("");
+  const [result, setResult] = useState<"correct" | "wrong" | null>(null);
+  const [grid, setGrid] = useState(createEmptyGrid);
+  const [pieces, setPieces] = useState<BlastPiece[]>(() => randomPieces());
+  const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
+  const [movesLeft, setMovesLeft] = useState(BLAST_MOVES);
+  const [linesCleared, setLinesCleared] = useState(0);
+  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
 
-  function pick(side: "event" | "year", item: EventItem) {
-    if (matched.has(item.title)) return;
-    if (!selected || selected.side === side) {
-      setSelected({ side, title: item.title });
-      return;
-    }
-    if (selected.title === item.title) {
-      setMatched((current) => new Set(current).add(item.title));
-    }
-    setSelected(null);
+  const item = deck[questionIndex];
+  const questionsUntilBlast = QUESTIONS_PER_BLAST - questionsThisRound;
+
+  function checkAnswer(option: string) {
+    if (result || finished || phase !== "questions") return;
+    const right = answerMatches(option, item);
+    setResult(right ? "correct" : "wrong");
+    if (right) setScore((value) => value + 1);
   }
 
-  const done = matched.size === set.length;
-  return (
-    <div className={`pair-game ${variant}`}>
-      <div className="game-intro">
-        <div><span className="question-label">{variant === "blocks" ? "Build every pair" : "Clear the board"}</span><h4>{variant === "blocks" ? "Connect each event to its year" : "Match the event and year"}</h4></div>
-        <span>{matched.size} / {set.length}</span>
-      </div>
-      <div className="pair-columns">
-        <div>{set.map((item) => <button key={item.title} className={`${matched.has(item.title) ? "matched" : ""} ${selected?.side === "event" && selected.title === item.title ? "selected-pair" : ""}`} onClick={() => pick("event", item)}>{item.title}</button>)}</div>
-        <div>{years.map((item) => <button key={item.title} className={`${matched.has(item.title) ? "matched" : ""} ${selected?.side === "year" && selected.title === item.title ? "selected-pair" : ""}`} onClick={() => pick("year", item)}>{item.year}</button>)}</div>
-      </div>
-      {done && <div className="round-complete"><b>Board cleared.</b><button onClick={() => { setRound((value) => value + 1); setMatched(new Set()); setSelected(null); }}>New round →</button></div>}
-    </div>
-  );
-}
+  function advanceQuestion() {
+    const nextQuestionIndex = questionIndex + 1;
+    const nextQuestionsThisRound = questionsThisRound + 1;
 
-function BlastGame() {
-  const [index, setIndex] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [best, setBest] = useState(0);
-  const [run, setRun] = useState(0);
-  const seconds = useCountdown(true, run);
-  const item = events[(index * 7) % events.length];
+    if (nextQuestionIndex >= deck.length) {
+      setFinished(true);
+      setResult(null);
+      return;
+    }
 
-  function choose(option: string) {
-    if (seconds === 0) return;
-    if (option === item.year) {
-      const next = streak + 1;
-      setStreak(next);
-      setBest((value) => Math.max(value, next));
-      setIndex((value) => value + 1);
-    } else setStreak(0);
+    if (nextQuestionsThisRound >= QUESTIONS_PER_BLAST) {
+      setQuestionIndex(nextQuestionIndex);
+      setQuestionsThisRound(0);
+      setPhase("blast");
+      setMovesLeft(BLAST_MOVES);
+      setPieces(randomPieces());
+      setSelectedPieceId(null);
+      setResult(null);
+      setChoice("");
+      return;
+    }
+
+    setQuestionIndex(nextQuestionIndex);
+    setQuestionsThisRound(nextQuestionsThisRound);
+    setResult(null);
+    setChoice("");
+  }
+
+  function placeOnGrid(row: number, col: number) {
+    if (phase !== "blast" || !selectedPieceId || movesLeft <= 0) return;
+    const piece = pieces.find((entry) => entry.id === selectedPieceId);
+    if (!piece || !canPlacePiece(grid, piece.cells, row, col)) return;
+
+    const placed = placePiece(grid, piece.cells, row, col, piece.color);
+    const { grid: clearedGrid, cleared } = clearCompletedLines(placed);
+    const remainingPieces = pieces.filter((entry) => entry.id !== selectedPieceId);
+    const nextMoves = movesLeft - 1;
+
+    setGrid(clearedGrid);
+    setLinesCleared((value) => value + cleared);
+    setScore((value) => value + cleared * 10);
+    setMovesLeft(nextMoves);
+    setSelectedPieceId(null);
+    setPieces(remainingPieces.length ? remainingPieces : randomPieces());
+
+    if (nextMoves <= 0) finishBlastRound();
+  }
+
+  function finishBlastRound() {
+    setPhase("questions");
+    setQuestionsThisRound(0);
+    setSelectedPieceId(null);
+    setMovesLeft(BLAST_MOVES);
+    setPieces(randomPieces());
+
+    if (questionIndex >= deck.length - 1) {
+      setFinished(true);
+    }
+  }
+
+  function restart() {
+    reshuffle();
+    setPhase("questions");
+    setQuestionIndex(0);
+    setQuestionsThisRound(0);
+    setChoice("");
+    setResult(null);
+    setGrid(createEmptyGrid());
+    setPieces(randomPieces());
+    setSelectedPieceId(null);
+    setMovesLeft(BLAST_MOVES);
+    setLinesCleared(0);
+    setScore(0);
+    setFinished(false);
+  }
+
+  const selectedPiece = pieces.find((entry) => entry.id === selectedPieceId) ?? null;
+  const anyPieceFits = pieces.some((piece) => pieceFitsAnywhere(grid, piece.cells));
+
+  if (finished) {
+    return (
+      <div className="blast-game">
+        <div className="blast-score">
+          <span><b>{score}</b> score</span>
+          <span><b>{linesCleared}</b> lines</span>
+          <span><b>{deck.length}</b> events</span>
+        </div>
+        <div className="blast-core">
+          <div className="game-over">
+            <span className="question-label">Block Blast complete</span>
+            <h4>You cleared the full shuffled deck</h4>
+            <button className="primary-button" onClick={restart}>Play again →</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === "questions") {
+    return (
+      <div className="blast-game">
+        <div className="blast-score">
+          <span><b>{questionIndex + 1}</b> of {deck.length}</span>
+          <span><b>{questionsUntilBlast}</b> until blast</span>
+          <span><b>{score}</b> score</span>
+        </div>
+        <div className="blast-core">
+          <span className="question-label">Answer 5 questions to unlock Block Blast</span>
+          <h4>{item.title}</h4>
+          <div className="choice-grid">
+            {optionsFor(item, deck).map((option, optionIndex) => (
+              <button
+                key={option}
+                onClick={() => { setChoice(option); checkAnswer(option); }}
+                className={`${choice === option ? "chosen" : ""} ${result && option === item.year ? "right" : ""}`}
+                disabled={Boolean(result)}
+              >
+                <span>{String.fromCharCode(65 + optionIndex)}</span>{option}
+              </button>
+            ))}
+          </div>
+          {result && (
+            <div className={`feedback ${result}`}>
+              <div><b>{result === "correct" ? "Exactly right" : "Not quite"}</b><span>{item.year} · {item.exactDate}</span></div>
+              <button onClick={advanceQuestion}>{questionsThisRound + 1 >= QUESTIONS_PER_BLAST ? "Start Block Blast →" : "Next question →"}</button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="blast-game">
-      <div className="blast-score"><span><b>{seconds}</b> seconds</span><span><b>{streak}</b> streak</span><span><b>{best}</b> best</span></div>
-      <div className="blast-core">
-        <span className="question-label">Tap the year before time runs out</span>
-        <h4>{seconds ? item.title : "Time’s up"}</h4>
-        {seconds ? <div className="choice-grid">{optionsFor(item).map((option) => <button key={option} onClick={() => choose(option)}>{option}</button>)}</div> : <button className="primary-button" onClick={() => { setRun((value) => value + 1); setIndex(0); setStreak(0); }}>Play again</button>}
+      <div className="blast-score">
+        <span><b>{movesLeft}</b> moves left</span>
+        <span><b>{linesCleared}</b> lines cleared</span>
+        <span><b>{score}</b> score</span>
+      </div>
+      <div className="blast-core block-blast-board">
+        <div className="block-blast-header">
+          <div>
+            <span className="question-label">Block Blast unlocked</span>
+            <p>Place {BLAST_MOVES} blocks to clear rows and columns, then return to the quiz.</p>
+          </div>
+          {!anyPieceFits && (
+            <button className="quiet-button" onClick={finishBlastRound}>Skip to next questions</button>
+          )}
+        </div>
+
+        <div className="blast-grid" role="grid" aria-label="Block Blast board">
+          {grid.map((row, rowIndex) =>
+            row.map((cell, colIndex) => {
+              const preview =
+                selectedPiece &&
+                canPlacePiece(grid, selectedPiece.cells, rowIndex, colIndex);
+              return (
+                <button
+                  key={`${rowIndex}-${colIndex}`}
+                  className={`blast-cell ${cell ? "filled" : ""} ${preview ? "preview" : ""}`}
+                  style={cell ? { background: cell } : undefined}
+                  onClick={() => placeOnGrid(rowIndex, colIndex)}
+                  aria-label={cell ? "Filled cell" : "Empty cell"}
+                />
+              );
+            }),
+          )}
+        </div>
+
+        <div className="blast-tray" aria-label="Available blocks">
+          {pieces.map((piece) => (
+            <button
+              key={piece.id}
+              className={`blast-piece ${selectedPieceId === piece.id ? "selected" : ""} ${pieceFitsAnywhere(grid, piece.cells) ? "" : "disabled"}`}
+              onClick={() => setSelectedPieceId(piece.id)}
+              disabled={!pieceFitsAnywhere(grid, piece.cells)}
+            >
+              <span
+                className="blast-piece-grid"
+                style={{
+                  gridTemplateColumns: `repeat(${Math.max(...piece.cells.map(([, col]) => col)) + 1}, 16px)`,
+                }}
+              >
+                {renderPieceCells(piece)}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="blast-actions">
+          <button className="primary-button" onClick={finishBlastRound}>Finish blast round →</button>
+        </div>
       </div>
     </div>
   );
 }
 
+function renderPieceCells(piece: BlastPiece) {
+  const maxRow = Math.max(...piece.cells.map(([row]) => row));
+  const maxCol = Math.max(...piece.cells.map(([, col]) => col));
+  const cells = [];
+  for (let row = 0; row <= maxRow; row++) {
+    for (let col = 0; col <= maxCol; col++) {
+      const filled = piece.cells.some(([r, c]) => r === row && c === col);
+      cells.push(
+        <span
+          key={`${piece.id}-${row}-${col}`}
+          className={`blast-mini-cell ${filled ? "filled" : ""}`}
+          style={filled ? { background: piece.color } : undefined}
+        />,
+      );
+    }
+  }
+  return cells;
+}
+
 function CharmsGame() {
-  const [index, setIndex] = useState(2);
+  const { deck, reshuffle } = useShuffledDeck();
+  const [index, setIndex] = useState(0);
   const [hearts, setHearts] = useState(3);
   const [charms, setCharms] = useState(0);
-  const item = events[(index * 5) % events.length];
+  const item = deck[index];
+  const finished = hearts === 0 || index >= deck.length;
 
   function choose(option: string) {
+    if (finished) return;
     if (option === item.year) {
       setCharms((value) => value + 1);
       setIndex((value) => value + 1);
-    } else setHearts((value) => Math.max(0, value - 1));
+    } else {
+      setHearts((value) => Math.max(0, value - 1));
+    }
   }
 
   function reset() {
-    setHearts(3); setCharms(0); setIndex(2);
+    reshuffle();
+    setHearts(3);
+    setCharms(0);
+    setIndex(0);
   }
 
   return (
     <div className="charms-game">
-      <div className="charms-header"><span className="charm-gem">⬟</span><div><b>{charms} charms</b><span>Build a collection without losing your hearts.</span></div><span className="hearts">{"♥".repeat(hearts)}{"♡".repeat(3 - hearts)}</span></div>
-      {hearts ? <div className="charm-question"><span className="question-label">Protect your streak</span><h4>{item.title}</h4><div className="choice-grid">{optionsFor(item).map((option) => <button key={option} onClick={() => choose(option)}>{option}</button>)}</div></div> : <div className="game-over"><span className="charm-gem">⬟</span><h4>You collected {charms} charms</h4><button className="primary-button" onClick={reset}>Try another run</button></div>}
+      <div className="charms-header">
+        <span className="charm-gem">⬟</span>
+        <div>
+          <b>{charms} charms</b>
+          <span>Question {Math.min(index + 1, deck.length)} of {deck.length} · every event, shuffled</span>
+        </div>
+        <span className="hearts">{"♥".repeat(hearts)}{"♡".repeat(3 - hearts)}</span>
+      </div>
+      {!finished ? (
+        <div className="charm-question">
+          <span className="question-label">Protect your hearts</span>
+          <h4>{item.title}</h4>
+          <div className="choice-grid">
+            {optionsFor(item, deck).map((option) => (
+              <button key={option} onClick={() => choose(option)}>{option}</button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="game-over">
+          <span className="charm-gem">⬟</span>
+          <h4>{hearts ? `You collected ${charms} charms` : `Run ended with ${charms} charms`}</h4>
+          <p>{index >= deck.length ? "You made it through the full shuffled deck." : "You ran out of hearts before finishing the deck."}</p>
+          <button className="primary-button" onClick={reset}>Try another run</button>
+        </div>
+      )}
     </div>
   );
 }

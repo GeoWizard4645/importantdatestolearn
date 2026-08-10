@@ -18,7 +18,6 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
-    "drizzle-orm": "0.45.2",
     "next": "^16.2.11",
     "react": "19.2.6",
     "react-dom": "19.2.6"

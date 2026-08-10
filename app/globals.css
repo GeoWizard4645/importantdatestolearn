@@ -194,7 +194,7 @@ a { color: inherit; text-decoration: none; }
 .mode-rail button b { display: block; font-size: 15px; }
 .mode-rail button small { display: block; margin-top: 3px; font-size: 10px; color: #99a2b5; }
 .mode-mark { display: grid; place-items: center; flex: 0 0 36px; height: 36px; border-radius: 10px; color: white; background: var(--blue); font-weight: 900; font-size: 18px; box-shadow: inset -7px -7px 0 rgba(39, 194, 243, .45); }
-.mode-mark.learn { background: #6c45e9; }.mode-mark.test { background: #4255ff; }.mode-mark.blocks { background: #4c68ff; }.mode-mark.blast { background: #5a58e9; border-radius: 50% 50% 50% 8px; }.mode-mark.match { background: #3d59e8; }.mode-mark.charms { background: #5f77ff; border-radius: 50%; }
+.mode-mark.learn { background: #6c45e9; }.mode-mark.test { background: #4255ff; }.mode-mark.blockblast { background: #5a58e9; border-radius: 50% 50% 50% 8px; }.mode-mark.charms { background: #5f77ff; border-radius: 50%; }
 .study-workspace { padding: 34px clamp(24px, 5vw, 70px) 50px; }
 .workspace-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
 .workspace-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .12em; font-weight: 800; }
@@ -236,6 +236,7 @@ a { color: inherit; text-decoration: none; }
 .choice-grid button { min-height: 62px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 2px solid #e0e4ed; border-radius: 12px; background: white; cursor: pointer; font-weight: 800; text-align: left; }
 .choice-grid button:hover, .choice-grid button.chosen { border-color: var(--blue); background: #f5f6ff; }
 .choice-grid button.right { border-color: #34b276; background: #edf9f3; }
+.choice-grid button.wrong-choice { border-color: #e07a66; background: #fff0ec; }
 .choice-grid button > span { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 7px; background: #eff1f7; font-size: 11px; }
 .written-form { display: flex; gap: 10px; }
 .written-form input { flex: 1; min-width: 0; padding: 16px; border: 2px solid #dfe3ec; border-radius: 12px; outline: none; }
@@ -263,6 +264,22 @@ a { color: inherit; text-decoration: none; }
 .blast-score span { padding: 20px; border-right: 1px solid rgba(255,255,255,.18); text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
 .blast-score b { display: block; font-size: 26px; letter-spacing: -.04em; }
 .blast-core { padding: clamp(35px, 6vw, 70px); }
+.block-blast-board { display: flex; flex-direction: column; gap: 22px; }
+.block-blast-header { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.block-blast-header p { margin: 8px 0 0; color: var(--muted); font-size: 13px; max-width: 520px; }
+.blast-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 4px; padding: 14px; border-radius: 16px; background: #eef1f8; border: 1px solid #dde3ef; }
+.blast-cell { aspect-ratio: 1; border: 0; border-radius: 6px; background: #f8f9fc; cursor: pointer; transition: background .12s, transform .12s; }
+.blast-cell.preview { background: rgba(66, 85, 255, .22); box-shadow: inset 0 0 0 2px rgba(66, 85, 255, .45); }
+.blast-cell.filled { cursor: default; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .12); }
+.blast-tray { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.blast-piece { min-height: 92px; display: grid; place-items: center; padding: 12px; border: 2px solid #e0e4ed; border-radius: 14px; background: white; cursor: pointer; }
+.blast-piece.selected { border-color: var(--blue); background: #f5f6ff; box-shadow: 0 0 0 3px rgba(66, 85, 255, .12); }
+.blast-piece.disabled { opacity: .35; cursor: not-allowed; }
+.blast-piece-grid { display: grid; gap: 3px; }
+.blast-mini-cell { width: 16px; height: 16px; border-radius: 4px; background: transparent; }
+.blast-mini-cell.filled { box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .12); }
+.blast-actions { display: flex; justify-content: center; }
+.game-over p { max-width: 460px; margin: 0 0 18px; color: var(--muted); font-size: 14px; line-height: 1.6; }
 .charms-header { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px; padding-bottom: 25px; border-bottom: 1px solid var(--line); }
 .charm-gem { display: grid; place-items: center; width: 55px; height: 55px; border-radius: 50%; background: linear-gradient(145deg, #7f91ff, #4255ff); color: white; font-size: 26px; box-shadow: 0 8px 20px rgba(66,85,255,.24); }
 .charms-header b, .charms-header span { display: block; }.charms-header div span { margin-top: 3px; color: var(--muted); font-size: 12px; }

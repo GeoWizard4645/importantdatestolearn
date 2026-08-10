@@ -15,11 +15,11 @@ test("page copy uses the dynamic event count", async () => {
   assert.match(page, /\{events\.length\} turning points/);
 });
 
-test("wrangler deploy runs the OpenNext build automatically", async () => {
+test("wrangler deploy uses prebuilt OpenNext output", async () => {
   const wrangler = await readFile(new URL("wrangler.jsonc", root), "utf8");
   assert.match(wrangler, /"name":\s*"importantdatestolearn"/);
   assert.match(wrangler, /"main":\s*"\.open-next\/worker\.js"/);
-  assert.match(wrangler, /"command":\s*"npx opennextjs-cloudflare build"/);
+  assert.doesNotMatch(wrangler, /"build":\s*\{/);
 });
 
 test("package scripts use Next.js and OpenNext", async () => {

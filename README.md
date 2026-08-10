@@ -16,14 +16,18 @@ npm run build
 
 ## Cloudflare Deploy
 
-This project is configured for Cloudflare Workers auto-deploy with the default commands:
+Use these settings in the Cloudflare dashboard:
 
-- **Build command:** (none required — Wrangler runs the OpenNext build automatically)
-- **Deploy command:** `npx wrangler deploy`
+| Setting | Value |
+|---|---|
+| **Build command** | `npx opennextjs-cloudflare build` |
+| **Deploy command** | `npx wrangler deploy` |
 
-The `build.command` in `wrangler.jsonc` runs `npx opennextjs-cloudflare build` before each deploy, so Cloudflare does not need custom build settings.
+The build step compiles the app once. Deploy only uploads the existing `.open-next/` output — it should **not** run another build.
 
-For local deploys you can also run:
+Optional: set `NEXT_PUBLIC_SITE_URL` in Cloudflare build variables if you use a custom domain for Open Graph links.
+
+For local deploys:
 
 ```bash
 npm run deploy
