@@ -25,7 +25,13 @@ Use these settings in the Cloudflare dashboard:
 
 The build step compiles the app once. Deploy only uploads the existing `.open-next/` output — it should **not** run another build.
 
-Optional: set `NEXT_PUBLIC_SITE_URL` in Cloudflare build variables if you use a custom domain for Open Graph links.
+Optional: set this build variable in Cloudflare for Open Graph links:
+
+| Variable | Value |
+|---|---|
+| `NEXT_PUBLIC_SITE_URL` | `https://dates.vivaanshahani.com` |
+
+Custom domain routing is declared in `wrangler.jsonc` for `dates.vivaanshahani.com`.
 
 For local deploys:
 

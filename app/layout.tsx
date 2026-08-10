@@ -14,8 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  "https://importantdatestolearn.vivann-shahani.workers.dev";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://dates.vivaanshahani.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
