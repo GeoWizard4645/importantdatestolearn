@@ -1,0 +1,562 @@
+[
+  {
+    "sourceOrder": 1,
+    "title": "The Neolithic Agricultural Revolution",
+    "year": "c. 10,000 BCE",
+    "exactDate": "Era beginning c. 10,000 BCE (Pre-Pottery Neolithic A)",
+    "description": "The fundamental transition of human societies from nomadic hunting and gathering to settled agriculture and animal domestication. Originating in the Fertile Crescent, this shift enabled permanent settlements, surplus food production, rapid population growth, labor specialization, and the initial foundation of human civilization.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 2,
+    "title": "Invention of the Wheel",
+    "year": "c. 3500 BCE",
+    "exactDate": "c. 3500 BCE (Uruk Period, Ancient Mesopotamia)",
+    "description": "First utilized as a potter's wheel in ancient Mesopotamia and quickly adapted for land transportation, the wheel revolutionized trade, agriculture, warfare, and engineering. It remains one of the most critical mechanical innovations in human history.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 3,
+    "title": "Construction of the Great Pyramid of Giza",
+    "year": "c. 2560 BCE",
+    "exactDate": "c. 2580–2560 BCE (Reign of Pharaoh Khufu)",
+    "description": "Constructed over two decades as a monumental tomb for the Fourth Dynasty Egyptian Pharaoh Khufu, the Great Pyramid stood as the tallest man-made structure in the world for over 3,800 years. It stands as a testament to the engineering, geometry, and centralized administrative capacity of Ancient Egypt.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 4,
+    "title": "Promulgation of the Code of Hammurabi",
+    "year": "c. 1750 BCE",
+    "exactDate": "c. 1755–1750 BCE",
+    "description": "Enacted by King Hammurabi of the First Babylonian Empire, this collection of 282 laws inscribed on a basalt stele established legal principles including \"an eye for an eye,\" presumption of innocence, and formal contracts, establishing critical early precedents for statutory law.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 5,
+    "title": "Emergence of Classical Greek Civilization",
+    "year": "c. 800 BCE",
+    "exactDate": "c. 800 BCE (Beginning of the Archaic Period)",
+    "description": "The rise of independent city-states (poleis) such as Athens and Sparta fostered rapid advancements in democratic governance, philosophy, theater, literature, geometry, and architecture, laying the intellectual bedrock for Western civilization.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 6,
+    "title": "The Life of Confucius and Birth of Confucianism",
+    "year": "551–479 BCE",
+    "exactDate": "551–479 BCE (Spring and Autumn period, China)",
+    "description": "The life and teachings of the Chinese philosopher Confucius established a moral and ethical system that became the foundation of Chinese social structure, government, and education for millennia.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 7,
+    "title": "Traditional Founding of Ancient Rome",
+    "year": "753 BCE",
+    "exactDate": "April 21, 753 BCE",
+    "description": "According to Roman mythology, twin brothers Romulus and Remus founded the city of Rome along the Tiber River. Over the next millennium, Rome expanded from a modest kingdom into a republic and eventually a vast empire dominating the Mediterranean basin.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 8,
+    "title": "The Battle of Marathon",
+    "year": "490 BCE",
+    "exactDate": "September 12, 490 BCE",
+    "description": "During the First Persian Invasion of Greece, heavily outnumbered Athenian forces routed the invading army of Persian King Darius I. The victory preserved Athenian independence and fledgling democratic institutions while proving that Persian forces could be defeated.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 9,
+    "title": "The Battle of Thermopylae",
+    "year": "480 BCE",
+    "exactDate": "August / September 480 BCE",
+    "description": "A small Greek coalition led by King Leonidas I of Sparta held the narrow pass of Thermopylae against the massive invading army of Persian King Xerxes I for three days. Though a military defeat, their heroic rearguard stand galvanized Greek unity, paving the way for eventual victory at Salamis and Plataea.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 10,
+    "title": "Conquests of Alexander the Great",
+    "year": "336–323 BCE",
+    "exactDate": "July 336 BCE (Ascension) – June 10/11, 323 BCE (Death)",
+    "description": "King Alexander III of Macedon executed an unprecedented military campaign, destroying the Achaemenid Persian Empire and extending Greek rule into Egypt and Northwest India. His campaigns inaugurated the Hellenistic Era, spreading Greek culture, language, and trade across Eurasia.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 11,
+    "title": "Unification of Imperial China under Qin Shi Huang",
+    "year": "221 BCE",
+    "exactDate": "221 BCE",
+    "description": "Ying Zheng conquered the competing Warring States, established the Qin Dynasty, and assumed the title of First Emperor (Qin Shi Huang). He standardized writing, currency, weights, and measures, and initiated the connection of regional fortifications into the Great Wall of China.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 12,
+    "title": "Hannibal & the Second Punic War",
+    "year": "218–201 BCE",
+    "exactDate": "March 218 BCE (Crossing of the Ebro) – October 201 BCE",
+    "description": "Carthaginian general Hannibal Barca launched a daring march across the Alps into Italy, inflicting crushing defeats on Rome at Cannae. Rome's eventual victory under Scipio Africanus destroyed Carthaginian power and established total Roman dominance over the Western Mediterranean.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 13,
+    "title": "Establishment of the Silk Road Trade Network",
+    "year": "c. 130 BCE",
+    "exactDate": "c. 130 BCE (Expeditions of Zhang Qian under Han Emperor Wu)",
+    "description": "Officially opened under China's Han Dynasty following diplomat Zhang Qian's missions to Central Asia, this transcontinental network of trade routes linked East Asia with Persia, the Middle East, and Europe, driving commercial, cultural, religious, and technological exchange for centuries.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 14,
+    "title": "Reign and Death of Cleopatra VII",
+    "year": "51–30 BCE",
+    "exactDate": "August 10 or 12, 30 BCE (Death)",
+    "description": "As the last active Pharaoh of Ptolemaic Egypt, Cleopatra forged crucial political and personal alliances with Julius Caesar and Mark Antony. Her defeat at the Battle of Actium and subsequent death ended the Hellenistic period and saw Egypt annexed as a Roman province.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 15,
+    "title": "Assassination of Julius Caesar",
+    "year": "44 BCE",
+    "exactDate": "March 15, 44 BCE (Ides of March)",
+    "description": "Dictator Julius Caesar was stabbed to death in the Roman Senate by a group of conspirators led by Brutus and Cassius. His death triggered a series of civil wars that led to the collapse of the Roman Republic and the rise of the Roman Empire.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 16,
+    "title": "Constantine’s Legalization of Christianity (Edict of Milan)",
+    "year": "313 CE",
+    "exactDate": "February 313 CE",
+    "description": "Emperors Constantine the Great and Licinius issued the Edict of Milan, granting religious tolerance to Christians throughout the Roman Empire. Constantine's imperial patronage transformed Christianity from a persecuted underground movement into the dominant religion of Western civilization.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 17,
+    "title": "Collapse of the Western Roman Empire",
+    "year": "476 CE",
+    "exactDate": "September 4, 476 CE",
+    "description": "Germanic chieftain Odoacer deposed the last Western Roman Emperor, Romulus Augustulus. This event traditionally marks the end of Classical Antiquity and the beginning of the Middle Ages in Europe.",
+    "era": "Ancient World & Classical Antiquity (c. 10,000 BCE – 5th Century CE)"
+  },
+  {
+    "sourceOrder": 18,
+    "title": "Invention of Woodblock Printing in Tang Dynasty China",
+    "year": "c. 600–700 CE",
+    "exactDate": "c. 7th Century CE (Tang Dynasty)",
+    "description": "Chinese artisans perfected woodblock printing, enabling the mass reproduction of religious texts, government records, and classical literature. The technology dramatically increased literacy and administrative efficiency across East Asia.",
+    "era": "Post-Classical & Medieval Period (6th Century – 15th Century)"
+  },
+  {
+    "sourceOrder": 19,
+    "title": "Leif Erikson Establishes Settlement at Vinland",
+    "year": "c. 1000 CE",
+    "exactDate": "c. 1000 CE (L'Anse aux Meadows, Canada)",
+    "description": "Norse explorer Leif Erikson became the first known European to set foot in North America, establishing a short-lived settlement at Vinland nearly 500 years before Christopher Columbus.",
+    "era": "Post-Classical & Medieval Period (6th Century – 15th Century)"
+  },
+  {
+    "sourceOrder": 20,
+    "title": "The Great Schism of the Christian Church",
+    "year": "1054 CE",
+    "exactDate": "July 16, 1054",
+    "description": "Growing theological, linguistic, and political divisions culminated in mutual excommunications between the Papal legate in Constantinople and Patriarch Michael Keroularios, formalizing the permanent split between the Western Roman Catholic Church and Eastern Orthodox Church.",
+    "era": "Post-Classical & Medieval Period (6th Century – 15th Century)"
+  },
+  {
+    "sourceOrder": 21,
+    "title": "The First Crusade",
+    "year": "1095–1099 CE",
+    "exactDate": "November 1095 (Council of Clermont) – July 1099 (Capture of Jerusalem)",
+    "description": "Initiated by Pope Urban II, the First Crusade was a massive military expedition by Western European Christians to reclaim the Holy Land from Muslim rule, resulting in the capture of Jerusalem and the establishment of Crusader states.",
+    "era": "Post-Classical & Medieval Period (6th Century – 15th Century)"
+  },
+  {
+    "sourceOrder": 22,
+    "title": "The Norman Conquest of England / Battle of Hastings",
+    "year": "1066 CE",
+    "exactDate": "October 14, 1066",
+    "description": "William, Duke of Normandy, defeated Anglo-Saxon King Harold Godwinson at the Battle of Hastings. The conquest transformed English social structure, law, architecture, and language by blending Anglo-Saxon and Norman-French cultures.",
+    "era": "Post-Classical & Medieval Period (6th Century – 15th Century)"
+  },
+  {
+    "sourceOrder": 23,
+    "title": "Rise of Genghis Khan & Expansion of the Mongol Empire",
+    "year": "1206 CE",
+    "exactDate": "1206 CE (Kurultai at the Onon River)",
+    "description": "Temüjin united the nomadic tribes of the East Asian steppe and was proclaimed Genghis Khan. His military conquests established the largest contiguous land empire in world history, creating the Pax Mongolica that enabled trade and exchange across Eurasia.",
+    "era": "Post-Classical & Medieval Period (6th Century – 15th Century)"
+  },
+  {
+    "sourceOrder": 24,
+    "title": "Marco Polo's Travels Through Asia",
+    "year": "1271–1295 CE",
+    "exactDate": "1271 (Departure) – 1295 (Return to Venice)",
+    "description": "Venetian merchant Marco Polo traveled across the Silk Road to the court of Kublai Khan in China. His detailed chronicles introduced Europeans to the culture and technology of the East, inspiring later explorers like Columbus.",
+    "era": "Post-Classical & Medieval Period (6th Century – 15th Century)"
+  },
+  {
+    "sourceOrder": 25,
+    "title": "Signing of the Magna Carta",
+    "year": "1215 CE",
+    "exactDate": "June 15, 1215",
+    "description": "Rebellious English barons forced King John to grant a charter of rights at Runnymede. The document established that even the sovereign is subject to the law, providing foundational principles for modern constitutional democracy and due process.",
+    "era": "Post-Classical & Medieval Period (6th Century – 15th Century)"
+  },
+  {
+    "sourceOrder": 26,
+    "title": "Outbreak of the Black Death in Europe",
+    "year": "1346–1353 CE",
+    "exactDate": "October 1347 (Arrival of Genoese ships in Messina, Sicily)",
+    "description": "A devastating pneumonic and bubonic plague pandemic wiped out 30–60% of Europe's total population. The extreme labor shortage undermined feudalism, raised peasant wages, and triggered sweeping economic and religious changes.",
+    "era": "Post-Classical & Medieval Period (6th Century – 15th Century)"
+  },
+  {
+    "sourceOrder": 27,
+    "title": "Invention of Movable Type Printing Press by Gutenberg",
+    "year": "c. 1440 CE",
+    "exactDate": "c. 1440–1450 CE",
+    "description": "German goldsmith Johannes Gutenberg invented movable metal type, oil-based ink, and a practical wooden printing press in Mainz. Printing the Gutenberg Bible around 1455, his press democratized knowledge, fueling the Renaissance, Reformation, and Scientific Revolution.",
+    "era": "Post-Classical & Medieval Period (6th Century – 15th Century)"
+  },
+  {
+    "sourceOrder": 28,
+    "title": "High Renaissance Masterpieces by Leonardo and Michelangelo",
+    "year": "1498–1506 CE",
+    "exactDate": "1498 (The Last Supper & Pietà); 1501 (David); 1503–1506 (Mona Lisa)",
+    "description": "A period of unparalleled artistic achievement during the Italian Renaissance saw the creation of Leonardo da Vinci's \"The Last Supper\" and \"Mona Lisa,\" and Michelangelo's \"Pietà\" and \"David,\" defining Western aesthetics for centuries.",
+    "era": "Post-Classical & Medieval Period (6th Century – 15th Century)"
+  },
+  {
+    "sourceOrder": 29,
+    "title": "The Fall of Constantinople to the Ottoman Empire",
+    "year": "1453 CE",
+    "exactDate": "May 29, 1453",
+    "description": "Ottoman Sultan Mehmed II conquered Constantinople, bringing a final end to the 1,100-year Byzantine Empire. The victory established Ottoman dominance over trade routes to Asia, spurring European maritime exploration and driving Greek scholars to Western Europe.",
+    "era": "Post-Classical & Medieval Period (6th Century – 15th Century)"
+  },
+  {
+    "sourceOrder": 30,
+    "title": "The Peak of the Italian Renaissance",
+    "year": "c. 1300–1600 CE",
+    "exactDate": "Peak c. 1490s–1520s (High Renaissance)",
+    "description": "A period of profound artistic, scientific, and cultural rebirth across Western Europe centered in Italy. Championing humanism and classical scholarship, it yielded immortal artistic works by Leonardo da Vinci, Michelangelo, and Raphael.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 31,
+    "title": "Christopher Columbus Reaches the Americas",
+    "year": "1492 CE",
+    "exactDate": "October 12, 1492",
+    "description": "Sailing under the Spanish crown, Italian navigator Christopher Columbus made landfall in the Bahamas. This voyage established permanent contact between the Old and New Worlds, initiating the Columbian Exchange of food crops, animals, humans, and diseases.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 32,
+    "title": "Martin Luther Posts the 95 Theses (Protestant Reformation)",
+    "year": "1517 CE",
+    "exactDate": "October 31, 1517",
+    "description": "German theologian Martin Luther nailed his 95 Theses to the door of All Saints' Church in Wittenberg, attacking Catholic clerical corruption and the sale of indulgences. The act launched the Protestant Reformation and reshaped European politics and religion.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 33,
+    "title": "Cortés & the Fall of Tenochtitlan (Conquest of the Aztec Empire)",
+    "year": "1519–1521 CE",
+    "exactDate": "August 13, 1521 (Fall of Tenochtitlan)",
+    "description": "Spanish conquistador Hernán Cortés, leading Spanish soldiers and indigenous allies, captured Emperor Cuauhtémoc and destroyed the Aztec capital. The fall established Spanish colonial control in Mesoamerica and founded the Viceroyalty of New Spain.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 34,
+    "title": "Birth of William Shakespeare",
+    "year": "1564 CE",
+    "exactDate": "April 26, 1564 (Baptismal Date)",
+    "description": "English playwright and poet born in Stratford-upon-Avon. His dramatic masterpieces (Hamlet, Macbeth, Othello, King Lear) revolutionized Western theater, literature, and the English language itself.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 35,
+    "title": "Founding of Jamestown Colony",
+    "year": "1607 CE",
+    "exactDate": "May 14, 1607",
+    "description": "English colonists established Jamestown, Virginia, the first permanent English settlement in the Americas. It laid the foundation for the United States and the expansion of the British Empire in North America.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 36,
+    "title": "Galileo’s Discoveries & the Scientific Revolution",
+    "year": "1610 CE",
+    "exactDate": "March 13, 1610 (Publication of *Sidereus Nuncius*)",
+    "description": "Galileo Galilei published telescopic observations of Jupiter's moons, the phases of Venus, and lunar terrain, providing empirical proof for Copernican heliocentrism and fundamentally advancing the scientific method.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 37,
+    "title": "The Thirty Years' War",
+    "year": "1618–1648 CE",
+    "exactDate": "May 1618 (Defenestration of Prague) – October 1648 (Peace of Westphalia)",
+    "description": "Initially a religious conflict between Protestants and Catholics in the Holy Roman Empire, it evolved into a devastating European power struggle. The war ended with the Peace of Westphalia, establishing the modern system of sovereign nation-states.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 38,
+    "title": "Construction of the Taj Mahal",
+    "year": "1632–1653 CE",
+    "exactDate": "1632–1653 CE",
+    "description": "Mughal Emperor Shah Jahan commissioned the white marble mausoleum in Agra for his favorite wife, Mumtaz Mahal. It is widely considered the greatest masterpiece of Indo-Islamic architecture.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 39,
+    "title": "The English Civil War",
+    "year": "1642–1651 CE",
+    "exactDate": "August 1642 – September 1651",
+    "description": "A series of armed conflicts between Parliamentarians (\"Roundheads\") and Royalists (\"Cavaliers\") over the manner of England's governance. It resulted in the trial and execution of Charles I and established the precedent that the monarch cannot rule without Parliament's consent.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 40,
+    "title": "Isaac Newton Publishes Principia Mathematica",
+    "year": "1687 CE",
+    "exactDate": "July 5, 1687",
+    "description": "Sir Isaac Newton published Philosophiæ Naturalis Principia Mathematica, introducing the three laws of motion and universal gravitation. His work laid the foundation for classical mechanics and propelled the Enlightenment.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 41,
+    "title": "Patent of Watt's Steam Engine & Industrial Revolution",
+    "year": "1765–1776 CE",
+    "exactDate": "1765 (Invention) / 1769 (Patent) / 1776 (Commercial deployment)",
+    "description": "James Watt patented critical improvements to the steam engine, creating a practical source of industrial power. The invention drove the Industrial Revolution, replacing agrarian economies with mechanized factories, railways, and urban centers.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 42,
+    "title": "Adoption of the American Declaration of Independence",
+    "year": "1776 CE",
+    "exactDate": "July 4, 1776",
+    "description": "The Continental Congress formally declared independence from Great Britain, asserting fundamental human rights to \"Life, Liberty and the pursuit of Happiness.\" The declaration birthed the United States and inspired democratic revolutions globally.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 43,
+    "title": "Storming of the Bastille & Outbreak of the French Revolution",
+    "year": "1789 CE",
+    "exactDate": "July 14, 1789",
+    "description": "Parisian revolutionaries stormed the Bastille fortress, unleashing a violent revolution that overturned absolute monarchy, feudal aristocracy, and church privileges, replacing them with modern concepts of citizenship, secularism, and human rights.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 44,
+    "title": "U.S. Constitution",
+    "year": "1787",
+    "exactDate": "September 17, 1787 (Signing)",
+    "description": "Leaders wrote the supreme law of the land to create a stable federal government and protect individual rights.",
+    "era": "Early Modern Era (16th Century – 18th Century)"
+  },
+  {
+    "sourceOrder": 45,
+    "title": "The Battle of Waterloo & Fall of Napoleon",
+    "year": "1815 CE",
+    "exactDate": "June 18, 1815",
+    "description": "British and Prussian forces under Wellington and Blücher decisively defeated Napoleon Bonaparte in modern-day Belgium. Waterloo ended the Napoleonic Wars and established a century of relative European geopolitical stability via the Congress of Vienna.",
+    "era": "The 19th Century (1801 – 1900)"
+  },
+  {
+    "sourceOrder": 46,
+    "title": "The Revolutions of 1848 Across Europe",
+    "year": "1848 CE",
+    "exactDate": "February 22, 1848 (Outbreak in Paris)",
+    "description": "A chain of political upheavals known as the \"Springtime of the Peoples\" spread across more than 50 European countries. Driven by popular demands for constitutional government, press freedom, national unification, and workers' rights, it transformed European political reform.",
+    "era": "The 19th Century (1801 – 1900)"
+  },
+  {
+    "sourceOrder": 47,
+    "title": "The American Civil War",
+    "year": "1861-1865",
+    "exactDate": "April 12, 1861 – May 26, 1865",
+    "description": "The American Civil War was fought from April 12, 1861, to May 26, 1865. It was a war between the United States Union (the North) and the Confederacy (the South), which broke away to keep slavery alive. The Union won, slavery ended, and four million people were freed.",
+    "era": "The 19th Century (1801 – 1900)"
+  },
+  {
+    "sourceOrder": 48,
+    "title": "Publication of The Communist Manifesto",
+    "year": "1848 CE",
+    "exactDate": "February 21, 1848",
+    "description": "Karl Marx and Friedrich Engels published their political pamphlet outlining the theories of class struggle and the inevitable rise of the proletariat. It became one of the world's most influential political documents.",
+    "era": "The 19th Century (1801 – 1900)"
+  },
+  {
+    "sourceOrder": 49,
+    "title": "Patent of the Telephone",
+    "year": "1876 CE",
+    "exactDate": "March 7, 1876 (Patent issued to Alexander Graham Bell)",
+    "description": "Alexander Graham Bell was granted a patent for the telephone, an invention that revolutionized global communication by enabling the transmission of vocal sounds over telegraph wires.",
+    "era": "The 19th Century (1801 – 1900)"
+  },
+  {
+    "sourceOrder": 50,
+    "title": "The Berlin Conference",
+    "year": "1884–1885 CE",
+    "exactDate": "November 1884 – February 1885",
+    "description": "European powers met in Berlin to formalize the \"Scramble for Africa,\" regulating European colonization and trade on the continent. The conference drew artificial borders that continue to impact African geopolitics.",
+    "era": "The 19th Century (1801 – 1900)"
+  },
+  {
+    "sourceOrder": 51,
+    "title": "The Meiji Restoration in Japan",
+    "year": "1868 CE",
+    "exactDate": "January 3, 1868",
+    "description": "A political coup ended the Tokugawa Shogunate and restored formal political power to Emperor Meiji. Japan embarked on sweeping modernization, industrialization, and Westernization, emerging as an industrial military power within a single generation.",
+    "era": "The 19th Century (1801 – 1900)"
+  },
+  {
+    "sourceOrder": 52,
+    "title": "Outbreak of World War I",
+    "year": "1914 CE",
+    "exactDate": "July 28, 1914",
+    "description": "Following the assassination of Archduke Franz Ferdinand, Austria-Hungary declared war on Serbia, triggering alliance mechanisms that drew European nations into a global industrialized war defined by trench warfare and immense casualties.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 53,
+    "title": "First Powered Flight by the Wright Brothers",
+    "year": "1903 CE",
+    "exactDate": "December 17, 1903",
+    "description": "Orville and Wilbur Wright achieved the first successful, controlled, and sustained flight of a powered, heavier-than-air aircraft at Kitty Hawk, North Carolina, launching the aviation age.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 54,
+    "title": "The Russian Revolution (Bolshevik October Revolution)",
+    "year": "1917 CE",
+    "exactDate": "November 7, 1917 (October 25 in the Julian Calendar)",
+    "description": "Vladimir Lenin and the Bolshevik Party overthrew the Russian Provisional Government in Petrograd, establishing the world's first communist government and laying the foundation for the Soviet Union in 1922.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 55,
+    "title": "End of World War I & Signing of the Treaty of Versailles",
+    "year": "1918–1919 CE",
+    "exactDate": "November 11, 1918 (Armistice) / June 28, 1919 (Treaty)",
+    "description": "An armistice halted combat on the Western Front on Armistice Day, followed by the signing of the Treaty of Versailles. The peace settlement dismantled four empires, redrew borders, created the League of Nations, and imposed harsh reparations on Germany.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 56,
+    "title": "The Great Depression and World War II",
+    "year": "1929–1945",
+    "exactDate": "October 1929 (Crash) – September 1945",
+    "description": "An economic collapse followed by entry into a global war transformed the U.S. into a leading military and economic superpower.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 57,
+    "title": "Outbreak of World War II",
+    "year": "1939 CE",
+    "exactDate": "September 1, 1939",
+    "description": "Nazi Germany invaded Poland, leading Britain and France to declare war. World War II evolved into the deadliest conflict in human history, involving total mobilization across Europe, Africa, Asia, and the Pacific.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 58,
+    "title": "The Trinity Test, Atomic Bombings & End of World War II",
+    "year": "1945 CE",
+    "exactDate": "July 16, 1945 (Trinity Test) / August 6 & 9, 1945 (Bombings), September 2, 1945 (Surrender)",
+    "description": "The United States successfully detonated the world's first nuclear device in New Mexico, followed by atomic strikes on the Japanese cities of Hiroshima and Nagasaki, forcing Japan's surrender and ushering in the Nuclear Age. Japan formally signed unconditional surrender documents aboard the USS Missouri in Tokyo Bay, concluding World War II. The postwar order saw the creation of the United Nations, decolonization across Asia and Africa, and global division into superpower blocs.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 59,
+    "title": "Announcement of the Truman Doctrine & Onset of the Cold War",
+    "year": "1947 CE",
+    "exactDate": "March 12, 1947",
+    "description": "US President Harry S. Truman pledged financial and military aid to nations threatened by Soviet expansion, establishing the policy of containment and formally initiating the strategic conflict known as the Cold War.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 60,
+    "title": "Independence and Partition of India",
+    "year": "1947 CE",
+    "exactDate": "August 15, 1947",
+    "description": "British imperial rule ended on the Indian subcontinent, dividing the territory into the independent nations of India and Pakistan. Partition spurred one of the largest mass migrations in history, accompanied by widespread violence and lasting regional tension.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 61,
+    "title": "Proclamation of the People's Republic of China",
+    "year": "1949 CE",
+    "exactDate": "October 1, 1949",
+    "description": "Mao Zedong proclaimed the founding of the People's Republic of China in Beijing after the Chinese Communist Party defeated Kuomintang Nationalist forces in the Chinese Civil War, reorganizing the world's most populous nation.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 62,
+    "title": "Outbreak of the Korean War",
+    "year": "1950 CE",
+    "exactDate": "June 25, 1950",
+    "description": "North Korean military forces invaded South Korea across the 38th parallel. The invasion initiated the first major open military engagement of the Cold War, involving direct combat between United Nations forces led by the US and Chinese troops.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 63,
+    "title": "Escalation & Beginning of the Vietnam War",
+    "year": "1955 / 1964 CE",
+    "exactDate": "November 1, 1955 (MAAG Establishment) / August 7, 1964 (Gulf of Tonkin Resolution)",
+    "description": "Conflict between communist North Vietnam and US-backed South Vietnam escalated into a major military war. The conflict became a defining proxy war of the Cold War era, profoundly impacting US foreign policy and global culture.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 64,
+    "title": "Civil Rights Movement",
+    "year": "1954–1968",
+    "exactDate": "May 17, 1954 (Brown v. Board) – April 4, 1968 (Assassination of MLK)",
+    "description": "Activists fought to end racial segregation and secure equal legal rights, leading to landmark laws like the Civil Rights Act of 1964 and the historic 'I Have a Dream' speech.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 65,
+    "title": "Women's Suffrage Movement in the United States",
+    "year": "1848–1920 CE",
+    "exactDate": "July 1848 (Seneca Falls Convention) – August 18, 1920 (Ratification of the 19th Amendment)",
+    "description": "A decades-long fight by women to win the right to vote in the United States. The movement succeeded with the ratification of the 19th Amendment, fundamentally expanding democratic participation.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 66,
+    "title": "Apollo 11 Moon Landing",
+    "year": "1969 CE",
+    "exactDate": "July 20, 1969",
+    "description": "NASA's Apollo 11 lunar module landed on the Moon, allowing Neil Armstrong and Buzz Aldrin to become the first human beings to step onto another celestial body, representing a historic triumph in space exploration.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 67,
+    "title": "Invention of the World Wide Web",
+    "year": "1989 CE",
+    "exactDate": "March 12, 1989",
+    "description": "CERN scientist Tim Berners-Lee published his proposal for an interconnected information management system using HTML, HTTP, and URLs. His creation of the World Wide Web transformed global communication, economics, and human information access.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 68,
+    "title": "Fall of the Berlin Wall",
+    "year": "1989 CE",
+    "exactDate": "November 9, 1989",
+    "description": "East German border guards opened checkpoints along the Berlin Wall following massive peaceful protests. Citizens destroyed the barrier separating East and West Berlin, symbolizing the collapse of Soviet bloc communism across Eastern Europe.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 69,
+    "title": "Dissolution of the Soviet Union",
+    "year": "1991 CE",
+    "exactDate": "December 26, 1991",
+    "description": "The Supreme Soviet officially voted to dissolve the USSR, ending 69 years of Soviet statehood and establishing independence for 15 republic nations. The dissolution marked the formal end of the Cold War era.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  },
+  {
+    "sourceOrder": 70,
+    "title": "Invention of the iPhone",
+    "year": "2007 CE",
+    "exactDate": "June 29, 2007",
+    "description": "Apple's Steve Jobs introduced the iPhone, a revolutionary device that combined a touch-screen smartphone with internet access, music and video capabilities, and a user-friendly interface. The iPhone transformed mobile computing and popularized smartphone technology worldwide.",
+    "era": "The Modern World & 20th Century (1901 – Present)"
+  }
+]
