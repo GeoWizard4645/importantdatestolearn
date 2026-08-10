@@ -4,12 +4,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import sourceEvents from "./events.json";
 
 type EventItem = (typeof sourceEvents)[number];
-type Mode = "learn" | "test" | "blockblast" | "charms";
+type Mode = "flashcards" | "learn" | "test" | "blockblast" | "charms";
 type AnswerStyle = "multiple" | "written";
 
+const TEST_QUESTION_COUNT = 20;
+
 const modes: { id: Mode; label: string; mark: string; note: string }[] = [
+  { id: "flashcards", label: "Flashcards", mark: "▰", note: "Flip and review" },
   { id: "learn", label: "Learn", mark: "✦", note: "All events, two ways" },
-  { id: "test", label: "Test", mark: "▤", note: "10-question rounds" },
+  { id: "test", label: "Test", mark: "▤", note: "20-question rounds" },
   { id: "blockblast", label: "Block Blast", mark: "◆", note: "Quiz, then 5 moves" },
   { id: "charms", label: "Charms", mark: "⬟", note: "Keep your hearts" },
 ];
@@ -110,6 +113,21 @@ function canPlacePiece(grid: (string | null)[][], cells: [number, number][], row
   });
 }
 
+function findAnchorForCell(grid: (string | null)[][], cells: [number, number][], targetRow: number, targetCol: number) {
+  for (const [dy, dx] of cells) {
+    const anchorRow = targetRow - dy;
+    const anchorCol = targetCol - dx;
+    if (canPlacePiece(grid, cells, anchorRow, anchorCol)) {
+      return { row: anchorRow, col: anchorCol };
+    }
+  }
+  return null;
+}
+
+function pieceCellsAtAnchor(cells: [number, number][], anchorRow: number, anchorCol: number) {
+  return cells.map(([dy, dx]) => [anchorRow + dy, anchorCol + dx] as [number, number]);
+}
+
 function placePiece(grid: (string | null)[][], cells: [number, number][], row: number, col: number, color: string) {
   const next = grid.map((line) => [...line]);
   cells.forEach(([dy, dx]) => {
@@ -152,10 +170,15 @@ function useShuffledDeck() {
 }
 
 export default function Home() {
-  const [mode, setMode] = useState<Mode>("learn");
+  const [mode, setMode] = useState<Mode>("flashcards");
+  const [cardIndex, setCardIndex] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [deck, setDeck] = useState(events);
+  const [starred, setStarred] = useState<Set<string>>(new Set());
   const [timelineIndex, setTimelineIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [era, setEra] = useState("All eras");
+  const card = deck[cardIndex];
   const timelineRows = useMemo(() => splitIntoRows(events, 7), []);
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -167,6 +190,49 @@ export default function Home() {
       return inEra && inSearch;
     });
   }, [search, era]);
+
+  function moveCard(direction: number) {
+    setCardIndex((current) => (current + direction + deck.length) % deck.length);
+    setFlipped(false);
+  }
+
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      const target = event.target as HTMLElement;
+      if (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+      if (mode !== "flashcards") return;
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        moveCard(1);
+      }
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        moveCard(-1);
+      }
+      if (event.key === " " || event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault();
+        setFlipped((value) => !value);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mode, deck.length]);
+
+  function shuffleDeck() {
+    const next = shuffleArray(deck);
+    setDeck(next);
+    setCardIndex(0);
+    setFlipped(false);
+  }
+
+  function toggleStar() {
+    setStarred((current) => {
+      const next = new Set(current);
+      if (next.has(card.title)) next.delete(card.title);
+      else next.add(card.title);
+      return next;
+    });
+  }
 
   function navigateTimeline(event: React.KeyboardEvent<HTMLDivElement>) {
     const moves: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
@@ -206,7 +272,7 @@ export default function Home() {
         </div>
         <div className="hero-facts" aria-label="Study set summary">
           <span><strong>{events.length}</strong> events</span>
-          <span><strong>4</strong> study modes</span>
+          <span><strong>5</strong> study modes</span>
           <span><strong>c. 10,000 BCE</strong> to <strong>{events[events.length - 1].year}</strong></span>
         </div>
       </section>
@@ -238,7 +304,10 @@ export default function Home() {
                     tabIndex={timelineIndex === index ? 0 : -1}
                     onFocus={() => setTimelineIndex(index)}
                     onClick={() => {
-                      setMode("learn");
+                      const deckIndex = deck.findIndex((entry) => entry.title === item.title);
+                      setCardIndex(deckIndex >= 0 ? deckIndex : events.indexOf(item));
+                      setFlipped(false);
+                      setMode("flashcards");
                       document.querySelector("#study")?.scrollIntoView({ behavior: "smooth" });
                     }}
                     aria-label={`${item.year}: ${item.title}`}
@@ -261,7 +330,7 @@ export default function Home() {
             <span className="section-kicker">Make it stick</span>
             <h2>Study your way</h2>
           </div>
-          <p>Learn, test, blast blocks, and collect charms. Every mode draws from the complete set of {events.length} events.</p>
+          <p>Flashcards, learn, test, blast blocks, and collect charms. Every mode draws from the complete set of {events.length} events.</p>
         </div>
 
         <div className="study-app">
@@ -284,11 +353,47 @@ export default function Home() {
                 <span className="workspace-label">World history</span>
                 <h3>{activeMode?.label}</h3>
               </div>
-              <span className="progress-pill">All {events.length} events</span>
+              <span className="progress-pill">
+                {mode === "flashcards" ? `${cardIndex + 1} / ${deck.length}` : `All ${events.length} events`}
+              </span>
             </div>
 
+            {mode === "flashcards" && (
+              <div className="flashcard-mode">
+                <div className="card-stack">
+                  <button
+                    className={`flashcard ${flipped ? "is-flipped" : ""}`}
+                    onClick={() => setFlipped((value) => !value)}
+                    aria-label={flipped ? "Showing answer. Flip to event." : "Showing event. Flip to answer."}
+                  >
+                    <span className="card-face card-front">
+                      <span className="card-prompt">What year was this?</span>
+                      <strong>{card.title}</strong>
+                      <span className="tap-hint">Click or press space to flip</span>
+                    </span>
+                    <span className="card-face card-back">
+                      <span className="answer-year">{card.year}</span>
+                      <span className="answer-date">{card.exactDate || "Date noted in the description"}</span>
+                      <span className="answer-divider" />
+                      <span className="answer-description">{card.description}</span>
+                    </span>
+                  </button>
+                </div>
+                <div className="card-controls">
+                  <button className="circle-button" onClick={() => moveCard(-1)} aria-label="Previous card">←</button>
+                  <div className="card-progress"><span style={{ width: `${((cardIndex + 1) / deck.length) * 100}%` }} /></div>
+                  <button className="circle-button" onClick={() => moveCard(1)} aria-label="Next card">→</button>
+                </div>
+                <div className="deck-tools">
+                  <button onClick={shuffleDeck}>↝ Shuffle</button>
+                  <button onClick={toggleStar} className={starred.has(card.title) ? "starred" : ""}>☆ {starred.has(card.title) ? "Starred" : "Star"}</button>
+                  <span>Arrow keys move · Space flips</span>
+                </div>
+              </div>
+            )}
+
             {mode === "learn" && <QuestionRound kind="Learn" limit={events.length} />}
-            {mode === "test" && <QuestionRound kind="Test" limit={10} />}
+            {mode === "test" && <QuestionRound kind="Test" limit={TEST_QUESTION_COUNT} />}
             {mode === "blockblast" && <BlockBlastGame />}
             {mode === "charms" && <CharmsGame />}
           </div>
@@ -447,6 +552,7 @@ function BlockBlastGame() {
   const [grid, setGrid] = useState(createEmptyGrid);
   const [pieces, setPieces] = useState<BlastPiece[]>(() => randomPieces());
   const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
+  const [hoverCell, setHoverCell] = useState<[number, number] | null>(null);
   const [movesLeft, setMovesLeft] = useState(BLAST_MOVES);
   const [linesCleared, setLinesCleared] = useState(0);
   const [score, setScore] = useState(0);
@@ -493,9 +599,12 @@ function BlockBlastGame() {
   function placeOnGrid(row: number, col: number) {
     if (phase !== "blast" || !selectedPieceId || movesLeft <= 0) return;
     const piece = pieces.find((entry) => entry.id === selectedPieceId);
-    if (!piece || !canPlacePiece(grid, piece.cells, row, col)) return;
+    if (!piece) return;
 
-    const placed = placePiece(grid, piece.cells, row, col, piece.color);
+    const anchor = findAnchorForCell(grid, piece.cells, row, col);
+    if (!anchor) return;
+
+    const placed = placePiece(grid, piece.cells, anchor.row, anchor.col, piece.color);
     const { grid: clearedGrid, cleared } = clearCompletedLines(placed);
     const remainingPieces = pieces.filter((entry) => entry.id !== selectedPieceId);
     const nextMoves = movesLeft - 1;
@@ -505,6 +614,7 @@ function BlockBlastGame() {
     setScore((value) => value + cleared * 10);
     setMovesLeft(nextMoves);
     setSelectedPieceId(null);
+    setHoverCell(null);
     setPieces(remainingPieces.length ? remainingPieces : randomPieces());
 
     if (nextMoves <= 0) finishBlastRound();
@@ -514,6 +624,7 @@ function BlockBlastGame() {
     setPhase("questions");
     setQuestionsThisRound(0);
     setSelectedPieceId(null);
+    setHoverCell(null);
     setMovesLeft(BLAST_MOVES);
     setPieces(randomPieces());
 
@@ -532,6 +643,7 @@ function BlockBlastGame() {
     setGrid(createEmptyGrid());
     setPieces(randomPieces());
     setSelectedPieceId(null);
+    setHoverCell(null);
     setMovesLeft(BLAST_MOVES);
     setLinesCleared(0);
     setScore(0);
@@ -540,6 +652,13 @@ function BlockBlastGame() {
 
   const selectedPiece = pieces.find((entry) => entry.id === selectedPieceId) ?? null;
   const anyPieceFits = pieces.some((piece) => pieceFitsAnywhere(grid, piece.cells));
+  const hoverAnchor =
+    selectedPiece && hoverCell
+      ? findAnchorForCell(grid, selectedPiece.cells, hoverCell[0], hoverCell[1])
+      : null;
+  const hoverFootprint = hoverAnchor
+    ? new Set(pieceCellsAtAnchor(selectedPiece!.cells, hoverAnchor.row, hoverAnchor.col).map(([r, c]) => `${r}-${c}`))
+    : null;
 
   if (finished) {
     return (
@@ -603,26 +722,33 @@ function BlockBlastGame() {
       </div>
       <div className="blast-core block-blast-board">
         <div className="block-blast-header">
-          <div>
-            <span className="question-label">Block Blast unlocked</span>
-            <p>Place {BLAST_MOVES} blocks to clear rows and columns, then return to the quiz.</p>
-          </div>
+          <p>Place {BLAST_MOVES} blocks to clear rows and columns, then return to the quiz.</p>
           {!anyPieceFits && (
-            <button className="quiet-button" onClick={finishBlastRound}>Skip to next questions</button>
+            <button className="quiet-button" onClick={finishBlastRound}>Skip</button>
           )}
         </div>
 
         <div className="blast-grid" role="grid" aria-label="Block Blast board">
           {grid.map((row, rowIndex) =>
             row.map((cell, colIndex) => {
-              const preview =
+              const preview = hoverFootprint?.has(`${rowIndex}-${colIndex}`) ?? false;
+              const canDrop =
                 selectedPiece &&
-                canPlacePiece(grid, selectedPiece.cells, rowIndex, colIndex);
+                !cell &&
+                Boolean(findAnchorForCell(grid, selectedPiece.cells, rowIndex, colIndex));
               return (
                 <button
                   key={`${rowIndex}-${colIndex}`}
-                  className={`blast-cell ${cell ? "filled" : ""} ${preview ? "preview" : ""}`}
-                  style={cell ? { background: cell } : undefined}
+                  className={`blast-cell ${cell ? "filled" : ""} ${preview ? "preview" : ""} ${canDrop && !preview ? "droppable" : ""}`}
+                  style={
+                    cell
+                      ? { background: cell }
+                      : preview && selectedPiece
+                        ? { background: `${selectedPiece.color}55` }
+                        : undefined
+                  }
+                  onMouseEnter={() => setHoverCell([rowIndex, colIndex])}
+                  onMouseLeave={() => setHoverCell(null)}
                   onClick={() => placeOnGrid(rowIndex, colIndex)}
                   aria-label={cell ? "Filled cell" : "Empty cell"}
                 />
@@ -636,13 +762,16 @@ function BlockBlastGame() {
             <button
               key={piece.id}
               className={`blast-piece ${selectedPieceId === piece.id ? "selected" : ""} ${pieceFitsAnywhere(grid, piece.cells) ? "" : "disabled"}`}
-              onClick={() => setSelectedPieceId(piece.id)}
+              onClick={() => {
+                setSelectedPieceId(piece.id);
+                setHoverCell(null);
+              }}
               disabled={!pieceFitsAnywhere(grid, piece.cells)}
             >
               <span
                 className="blast-piece-grid"
                 style={{
-                  gridTemplateColumns: `repeat(${Math.max(...piece.cells.map(([, col]) => col)) + 1}, 16px)`,
+                  gridTemplateColumns: `repeat(${Math.max(...piece.cells.map(([, col]) => col)) + 1}, 12px)`,
                 }}
               >
                 {renderPieceCells(piece)}
@@ -652,7 +781,7 @@ function BlockBlastGame() {
         </div>
 
         <div className="blast-actions">
-          <button className="primary-button" onClick={finishBlastRound}>Finish blast round →</button>
+          <button className="primary-button blast-finish" onClick={finishBlastRound}>Finish round →</button>
         </div>
       </div>
     </div>
